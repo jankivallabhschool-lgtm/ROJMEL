@@ -550,13 +550,17 @@
       const s = appData.school;
       return JSON.stringify(Object.assign({ udise: s.udise, pass: cloudPass, year: s.year, bookType: s.bookType }, extra));
     }
-    let cloudReadyKey = '';   // je book/year no cloud data safaltapurvak vanchai gayo hoy teni key
+    const cloudReadyKeys = new Set();   // je (udise|year|book) no cloud data safaltapurvak vanchai gayo hoy
+    let pendingPush = null;
     function currentCloudKey() {
       const s = appData.school;
       return [s.udise, s.year, s.bookType].join('|');
     }
+    function makePush() {
+      return { key: currentCloudKey(), body: cloudBody({ action: 'saveData', data: JSON.stringify(appData) }) };
+    }
     async function cloudPull() {
-      if (!cloudPass) return;
+      if (!cloudPass) { setSyncStatus('☁ સિંક બંધ - ફરી લૉગિન કરો', '#dc2626'); return; }
       const key = currentCloudKey();
       try {
         setSyncStatus('☁ ક્લાઉડમાંથી ડેટા લાવી રહ્યા છીએ...', '#2563eb');
@@ -564,11 +568,11 @@
         const url = `${APPS_SCRIPT_URL}?action=loadData&udise=${encodeURIComponent(s.udise)}&pass=${encodeURIComponent(cloudPass)}&year=${encodeURIComponent(s.year)}&bookType=${encodeURIComponent(s.bookType)}`;
         const res = await fetch(url);
         const data = await res.json();
-        if (key !== currentCloudKey()) return; // vachche book/year badlai gayu hoy to jone ignore karo
+        if (key !== currentCloudKey()) return; // vachche book/year badlai gayu hoy
         if (data && data.success && data.data) {
           const cloud = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
           const localTs = appData.updatedAt || 0;
-          cloudReadyKey = key;
+          cloudReadyKeys.add(key);
           if ((cloud.updatedAt || 0) >= localTs) {
             const currentSchool = Object.assign({}, appData.school);
             appData = Object.assign({}, appData, cloud);
@@ -579,31 +583,38 @@
             cloudPush(); // phone no data navo che -> cloud ma upload
           }
         } else if (data && data.success) {
-          cloudReadyKey = key;
-          // cloud ma haju data nathi -> fakt jo local ma kaik entry hoy to upload
+          cloudReadyKeys.add(key);
           if ((appData.transactions || []).length) cloudPush();
           else setSyncStatus('☁ ક્લાઉડ સાથે સિંક ✓', '#16a34a');
         } else {
-          setSyncStatus('☁ સિંક નિષ્ફળ', '#dc2626');
+          setSyncStatus('☁ સિંક નિષ્ફળ: ' + ((data && data.message) || ''), '#dc2626');
         }
       } catch (e) { setSyncStatus('☁ ઓફલાઇન (ફોનમાં સેવ)', '#d97706'); }
     }
     function cloudPushDebounced() {
+      pendingPush = makePush();            // ahi j snapshot (book badlay to pan sachi book no data jay)
       clearTimeout(cloudTimer);
-      cloudTimer = setTimeout(cloudPush, 1500);
+      cloudTimer = setTimeout(() => { cloudTimer = null; sendPush(pendingPush); }, 1500);
     }
-    async function cloudPush() {
-      if (!cloudPass || !appData.school.udise) return;
-      // Cloud no data vanchya vagar upload nahi (khali data thi cloud overwrite na thay)
-      if (cloudReadyKey !== currentCloudKey()) { cloudPull(); return; }
+    function flushCloudPush() {            // book badalta pehla baki rahel upload turant
+      if (cloudTimer) { clearTimeout(cloudTimer); cloudTimer = null; if (pendingPush) sendPush(pendingPush); }
+    }
+    function cloudPush() { sendPush(makePush()); }
+    async function sendPush(item) {
+      if (!item || !cloudPass || !appData.school.udise) return;
+      if (!cloudReadyKeys.has(item.key)) {  // cloud no data vanchya vagar upload nahi
+        if (item.key === currentCloudKey()) cloudPull();
+        return;
+      }
       try {
         setSyncStatus('☁ સેવ થઈ રહ્યું છે...', '#2563eb');
         const res = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: cloudBody({ action: 'saveData', data: JSON.stringify(appData) })
+          body: item.body
         });
         const out = await res.json();
+        if (out && out.conflict) { cloudReadyKeys.delete(item.key); if (item.key === currentCloudKey()) cloudPull().then(() => refreshAllViews()); return; }
         setSyncStatus(out && out.success ? '☁ ક્લાઉડમાં સેવ ✓' : '☁ સેવ નિષ્ફળ', out && out.success ? '#16a34a' : '#dc2626');
       } catch (e) { setSyncStatus('☁ ઓફલાઇન (ફોનમાં સેવ)', '#d97706'); }
     }
@@ -631,6 +642,7 @@
     function switchActiveBook(newBookType) {
       if (!BOOK_CONFIG[newBookType] || appData.school.bookType === newBookType) return;
       saveAppData();
+      flushCloudPush();
       appData.school.bookType = newBookType;
       try {
         const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
@@ -796,7 +808,7 @@
       if (session) {
         try {
           const sObj = JSON.parse(session);
-          if (sObj.udise && sObj.year) {
+          if (sObj.udise && sObj.year && sObj.pass) {
             appData.school.udise = sObj.udise;
             appData.school.year = sObj.year;
             appData.school.bookType = sObj.bookType || 'SMC';
