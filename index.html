@@ -849,12 +849,44 @@
     }
 
     function sortAndRecalculateVouchers() {
+      // જૂનો ડેટા: બિલ નંબર લખેલ હોય તો મેન્યુઅલ ગણાશે, ખાલી હોય તો ઓટો
+      appData.transactions.forEach(tx => {
+        if (tx.billManual === undefined) tx.billManual = !!String(tx.billNo || '').trim();
+      });
+      const manualKey = tx => (tx.type === 'expense' && tx.billManual) ? (parseInt(tx.billNo) || 0) : Number.MAX_SAFE_INTEGER;
       appData.transactions.sort((a, b) => {
         if (a.date !== b.date) return a.date.localeCompare(b.date);
-        return (parseInt(a.billNo) || 0) - (parseInt(b.billNo) || 0);
+        const ka = manualKey(a), kb = manualKey(b);
+        if (ka !== kb) return ka < kb ? -1 : 1;
+        return String(a.id).localeCompare(String(b.id), undefined, { numeric: true });
       });
       let vCounter = 1;
       appData.transactions.forEach(tx => { tx.voucherNo = (tx.type === 'expense') ? vCounter++ : ''; });
+
+      // ઓટો બિલ નંબર: ખર્ચના ક્રમ મુજબ, મેન્યુઅલ નંબર સાથે ટકરાય નહીં તે રીતે
+      const used = new Set();
+      appData.transactions.forEach(tx => {
+        if (tx.type === 'expense' && tx.billManual) used.add(String(tx.billNo).trim());
+      });
+      let bCounter = 1;
+      appData.transactions.forEach(tx => {
+        if (tx.type !== 'expense') { if (!tx.billManual) tx.billNo = ''; return; }
+        if (tx.billManual) return;
+        while (used.has(String(bCounter))) bCounter++;
+        tx.billNo = String(bCounter++);
+      });
+    }
+
+    function getNextBillNo() {
+      const used = new Set();
+      appData.transactions.forEach(tx => { if (tx.type === 'expense') used.add(String(tx.billNo || '').trim()); });
+      let n = 1; while (used.has(String(n))) n++;
+      return n;
+    }
+
+    function updateBillNoPlaceholder() {
+      const el = document.getElementById('txBillNo');
+      if (el) el.placeholder = 'ખાલી રાખો = ઓટો (' + getNextBillNo() + ')';
     }
 
     function toggleTxFields() {
@@ -884,9 +916,9 @@
 
       if (editId) {
         const idx = appData.transactions.findIndex(t => t.id === editId);
-        if (idx !== -1) appData.transactions[idx] = { id: editId, type, date, ledger, party, mode, billNo, chequeNo, amount, remarks };
+        if (idx !== -1) appData.transactions[idx] = { id: editId, type, date, ledger, party, mode, billNo, billManual: (type === 'expense' && !!billNo), chequeNo, amount, remarks };
       } else {
-        appData.transactions.push({ id: 'tx_' + Date.now(), type, date, ledger, party, mode, billNo, chequeNo, amount, remarks });
+        appData.transactions.push({ id: 'tx_' + Date.now(), type, date, ledger, party, mode, billNo, billManual: (type === 'expense' && !!billNo), chequeNo, amount, remarks });
       }
 
       sortAndRecalculateVouchers();
@@ -902,6 +934,7 @@
       document.getElementById('saveTxBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> સેવ કરો';
       document.getElementById('txDate').valueAsDate = new Date();
       toggleTxFields();
+      updateBillNoPlaceholder();
     }
 
     function editTransaction(id) {
@@ -913,7 +946,7 @@
       document.getElementById('txLedger').value = tx.ledger;
       document.getElementById('txParty').value = tx.party;
       document.getElementById('txMode').value = tx.mode;
-      document.getElementById('txBillNo').value = tx.billNo || '';
+      document.getElementById('txBillNo').value = tx.billManual ? (tx.billNo || '') : '';
       document.getElementById('txChequeNo').value = tx.chequeNo || '';
       document.getElementById('txAmount').value = tx.amount;
       document.getElementById('txRemarks').value = tx.remarks || '';
@@ -1077,10 +1110,44 @@
       renderCashbook();
     }
 
+    function cbIncCells(inc) {
+      return `<td class="text-center">${formatDateGuj(inc.date)}</td><td>${inc.ledger}</td><td>${inc.party}</td><td class="text-right">${inc.mode === 'Cash' ? formatCurrency(inc.amount) : '0.00'}</td><td class="text-right">${inc.mode === 'Bank' ? formatCurrency(inc.amount) : '0.00'}</td><td class="text-right font-bold">${formatCurrency(inc.amount)}</td>`;
+    }
+    function cbExpCells(exp) {
+      return `<td class="text-center">${formatDateGuj(exp.date)}</td><td><strong>${exp.party}</strong> (${exp.ledger})</td><td class="text-center">${exp.chequeNo || '-'}</td><td class="text-center font-bold">${exp.voucherNo || '-'}</td><td class="text-right">${exp.mode === 'Cash' ? formatCurrency(exp.amount) : '0.00'}</td><td class="text-right">${exp.mode === 'Bank' ? formatCurrency(exp.amount) : '0.00'}</td>`;
+    }
+    // તારીખ મુજબ: દરેક તારીખની આવક અને ખર્ચ એક જ લાઇનમાં; નવી તારીખ/એન્ટ્રી = નવી લાઇન
+    function buildCashbookRows(incomes, expenses) {
+      const dates = [...new Set([...incomes, ...expenses].map(t => t.date || ''))].sort();
+      let html = '';
+      dates.forEach(d => {
+        const ic = incomes.filter(t => (t.date || '') === d);
+        const ex = expenses.filter(t => (t.date || '') === d);
+        const n = Math.max(ic.length, ex.length);
+        for (let r = 0; r < n; r++) {
+          html += `<tr${r === 0 ? ' style="border-top:2px solid #94a3b8;"' : ''}>`;
+          html += ic[r] ? cbIncCells(ic[r]) : `<td colspan="6" style="background:#fafafa;"></td>`;
+          html += ex[r] ? cbExpCells(ex[r]) : `<td colspan="6" style="background:#fafafa;"></td>`;
+          html += `</tr>`;
+        }
+      });
+      return html;
+    }
+
     function renderCashbook() {
       const container = document.getElementById('cashbookContainer');
       const mode = document.getElementById('cashbookViewMode').value;
       container.innerHTML = '';
+      sortAndRecalculateVouchers();
+      const sy = parseInt((appData.school.year || '2025-2026').split('-')[0]) || 2025;
+      const outCount = appData.transactions.filter(t => t.date && (t.date < `${sy}-04-01` || t.date > `${sy + 1}-03-31`)).length;
+      if (outCount > 0) {
+        const w = document.createElement('div');
+        w.className = 'no-print';
+        w.style.cssText = 'background:#fef3c7;border:1px solid #f59e0b;color:#92400e;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:600;';
+        w.innerText = `ધ્યાન: ${outCount} વ્યવહારની તારીખ શૈક્ષણિક વર્ષ ${appData.school.year} (૧ એપ્રિલ ${sy} થી ૩૧ માર્ચ ${sy + 1}) ની બહાર છે. સેટિંગ્સમાં વર્ષ તપાસો.`;
+        container.appendChild(w);
+      }
       if (mode === 'ANNUAL_CONTINUOUS') renderAnnualContinuousCashbook(container);
       else renderMonthWiseCashbook(container);
     }
@@ -1097,13 +1164,13 @@
         const calYear = (m.num >= 4) ? startYr : (startYr + 1);
         const monthTxs = appData.transactions.filter(t => {
           if (!t.date) return false;
-          const d = new Date(t.date);
-          return (d.getMonth() + 1) === m.num && d.getFullYear() === calYear;
+          return parseInt(t.date.split('-')[1], 10) === m.num;
         });
 
         const incomes = monthTxs.filter(t => t.type === 'income');
         const expenses = monthTxs.filter(t => t.type === 'expense');
         const opCash = runCash, opBank = runBank, opTot = opCash + opBank;
+        const shownYear = monthTxs.length ? parseInt(monthTxs[0].date.split('-')[0], 10) : calYear;
 
         let incCash = 0, incBank = 0, expCash = 0, expBank = 0;
         incomes.forEach(i => { if (i.mode === 'Cash') incCash += i.amount; else incBank += i.amount; });
@@ -1119,19 +1186,10 @@
         card.className = "month-book-card";
         let rows = `<tr class="row-cyan"><td colspan="3" class="text-center font-bold">શ્રી ઉઘડતી સિલક</td><td class="text-right font-bold">${formatCurrency(opCash)}</td><td class="text-right font-bold">${formatCurrency(opBank)}</td><td class="text-right font-bold">${formatCurrency(opTot)}</td><td colspan="6" class="text-center" style="background:#f8fafc;">-</td></tr>`;
 
-        const maxL = Math.max(incomes.length, expenses.length);
-        if (maxL === 0) {
+        if (monthTxs.length === 0) {
           rows += `<tr><td colspan="6" class="text-center" style="padding:10px; color:#64748b;">આ માસમાં કોઈ આવક વ્યવહાર નથી.</td><td colspan="6" class="text-center" style="padding:10px; color:#64748b;">આ માસમાં કોઈ ખર્ચ વ્યવહાર નથી.</td></tr>`;
         } else {
-          for (let r = 0; r < maxL; r++) {
-            const inc = incomes[r], exp = expenses[r];
-            rows += `<tr>`;
-            if (inc) rows += `<td class="text-center">${formatDateGuj(inc.date)}</td><td>${inc.ledger}</td><td>${inc.party}</td><td class="text-right">${inc.mode === 'Cash' ? formatCurrency(inc.amount) : '0.00'}</td><td class="text-right">${inc.mode === 'Bank' ? formatCurrency(inc.amount) : '0.00'}</td><td class="text-right font-bold">${formatCurrency(inc.amount)}</td>`;
-            else rows += `<td colspan="6" style="background:#fafafa;"></td>`;
-            if (exp) rows += `<td class="text-center">${formatDateGuj(exp.date)}</td><td><strong>${exp.party}</strong> (${exp.ledger})</td><td class="text-center">${exp.chequeNo || '-'}</td><td class="text-center font-bold">${exp.voucherNo || '-'}</td><td class="text-right">${exp.mode === 'Cash' ? formatCurrency(exp.amount) : '0.00'}</td><td class="text-right">${exp.mode === 'Bank' ? formatCurrency(exp.amount) : '0.00'}</td>`;
-            else rows += `<td colspan="6" style="background:#fafafa;"></td>`;
-            rows += `</tr>`;
-          }
+          rows += buildCashbookRows(incomes, expenses);
         }
 
         rows += `
@@ -1141,7 +1199,7 @@
         `;
 
         card.innerHTML = `
-          <div class="month-book-header"><h3>${appData.school.name} - ${bookCfg.name}</h3><p><strong>માસ: ${m.gu} (${m.name}) - ${calYear}</strong> | વર્ષ: ${appData.school.year} | U-DISE: ${appData.school.udise}</p></div>
+          <div class="month-book-header"><h3>${appData.school.name} - ${bookCfg.name}</h3><p><strong>માસ: ${m.gu} (${m.name}) - ${shownYear}</strong> | વર્ષ: ${appData.school.year} | U-DISE: ${appData.school.udise}</p></div>
           <div class="table-container"><table><thead><tr><th colspan="6" style="background:#e2e8f0;">આવક બાજુ (જમા - Receipts)</th><th colspan="6" style="background:#fee2e2;">ખર્ચ બાજુ (ઉધાર - Payments)</th></tr><tr><th width="8%">તારીખ</th><th width="12%">વર્ગીકરણ</th><th width="14%">વિગત</th><th width="6%">રોકડ ₹</th><th width="7%">બેંક ₹</th><th width="7%">કુલ ₹</th><th width="8%">તારીખ</th><th width="16%">વિગત</th><th width="6%">ચેક નં.</th><th width="5%">વાઉચર</th><th width="6%">રોકડ ₹</th><th width="7%">બેંક ₹</th></tr></thead><tbody>${rows}</tbody></table></div>
           <div class="sign-row"><div class="sign-box">તૈયાર કરનાર શિક્ષક</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
         `;
@@ -1170,16 +1228,7 @@
 
       let rows = `<tr class="row-cyan"><td colspan="3" class="text-center font-bold">શ્રી શરૂઆતની ઉઘડતી સિલક (૦૧-૦૪)</td><td class="text-right font-bold">${formatCurrency(initCash)}</td><td class="text-right font-bold">${formatCurrency(initBank)}</td><td class="text-right font-bold">${formatCurrency(initCash+initBank)}</td><td colspan="6" class="text-center" style="background:#f8fafc;">-</td></tr>`;
 
-      const maxL = Math.max(incomes.length, expenses.length);
-      for (let r = 0; r < maxL; r++) {
-        const inc = incomes[r], exp = expenses[r];
-        rows += `<tr>`;
-        if (inc) rows += `<td class="text-center">${formatDateGuj(inc.date)}</td><td>${inc.ledger}</td><td>${inc.party}</td><td class="text-right">${inc.mode === 'Cash' ? formatCurrency(inc.amount) : '0.00'}</td><td class="text-right">${inc.mode === 'Bank' ? formatCurrency(inc.amount) : '0.00'}</td><td class="text-right font-bold">${formatCurrency(inc.amount)}</td>`;
-        else rows += `<td colspan="6" style="background:#fafafa;"></td>`;
-        if (exp) rows += `<td class="text-center">${formatDateGuj(exp.date)}</td><td><strong>${exp.party}</strong> (${exp.ledger})</td><td class="text-center">${exp.chequeNo || '-'}</td><td class="text-center font-bold">${exp.voucherNo || '-'}</td><td class="text-right">${exp.mode === 'Cash' ? formatCurrency(exp.amount) : '0.00'}</td><td class="text-right">${exp.mode === 'Bank' ? formatCurrency(exp.amount) : '0.00'}</td>`;
-        else rows += `<td colspan="6" style="background:#fafafa;"></td>`;
-        rows += `</tr>`;
-      }
+      rows += buildCashbookRows(incomes, expenses);
 
       rows += `
         <tr class="row-yellow"><td colspan="3" class="text-right font-bold">વાર્ષિક કુલ આવક:</td><td class="text-right font-bold">${formatCurrency(totIncCash)}</td><td class="text-right font-bold">${formatCurrency(totIncBank)}</td><td class="text-right font-bold">${formatCurrency(totIncCash+totIncBank)}</td><td colspan="4" class="text-right font-bold">વાર્ષિક કુલ ખર્ચ:</td><td class="text-right font-bold">${formatCurrency(totExpCash)}</td><td class="text-right font-bold">${formatCurrency(totExpBank)}</td></tr>
@@ -1266,7 +1315,9 @@
     function renderBillRegister() {
       document.getElementById('billRegSchoolHeader').innerText = appData.school.name;
       const tbody = document.getElementById('billRegTableBody'); tbody.innerHTML = '';
-      const expenses = appData.transactions.filter(t => t.type === 'expense');
+      sortAndRecalculateVouchers();
+      const expenses = appData.transactions.filter(t => t.type === 'expense')
+        .sort((a, b) => (parseInt(a.billNo) || 0) - (parseInt(b.billNo) || 0));
       let tot = 0;
       expenses.forEach((tx, idx) => {
         tot += tx.amount;
@@ -1414,6 +1465,8 @@
     }
 
     function refreshAllViews() {
+      sortAndRecalculateVouchers();
+      updateBillNoPlaceholder();
       updateHeaderBadges();
       updateMetricsDashboard();
       populateLedgerDropdowns();
