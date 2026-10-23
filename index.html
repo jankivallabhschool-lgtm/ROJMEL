@@ -6,7 +6,7 @@
   <title>શાળા રોજમેળ અને SMC હિસાબ પ્રણાલી</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhai+2:wght@600;700;800&family=Hind+Vadodara:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     :root {
@@ -126,21 +126,6 @@
     .modal-header { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
     .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 
-    #printBanner { display: none; }
-    @media print {
-      #printBanner {
-        display: block !important; text-align: center; margin: 0 0 8px 0; padding: 6px 10px 8px;
-        border: 2.5px double #1d4ed8; border-radius: 10px;
-        background: linear-gradient(90deg, #eff6ff, #fff7ed, #f0fdf4) !important;
-        -webkit-print-color-adjust: exact; print-color-adjust: exact; page-break-inside: avoid;
-      }
-      #printBanner .pb-school { font-family: 'Baloo Bhai 2', 'Hind Vadodara', sans-serif; font-size: 20pt; font-weight: 800; line-height: 1.25; color: #1e40af !important; letter-spacing: .3px; }
-      #printBanner .pb-row { margin-top: 3px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; font-family: 'Baloo Bhai 2', 'Hind Vadodara', sans-serif; font-size: 11.5pt; font-weight: 700; }
-      #printBanner .pb-chip { padding: 1px 12px; border-radius: 20px; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      #printBanner .pb-udise { background: #c2410c !important; }
-      #printBanner .pb-year  { background: #15803d !important; }
-      #printBanner .pb-book  { background: #7e22ce !important; }
-    }
     @media print {
       body { background: white; color: black; font-size: 9.5pt; }
       .no-print, .app-header, .nav-container, #loginScreenOverlay, .modal-overlay { display: none !important; }
@@ -156,16 +141,6 @@
   </style>
 </head>
 <body>
-
-  <!-- ===== PRINT BANNER (fakt print ma dekhase) ===== -->
-  <div id="printBanner">
-    <div class="pb-school" id="pbSchool">-</div>
-    <div class="pb-row">
-      <span class="pb-chip pb-udise">U-DISE: <span id="pbUdise">-</span></span>
-      <span class="pb-chip pb-year">નાણાકીય વર્ષ: <span id="pbYear">-</span></span>
-      <span class="pb-chip pb-book" id="pbBook">-</span>
-    </div>
-  </div>
 
   <!-- ==================== LOGIN SCREEN OVERLAY ==================== -->
   <div id="loginScreenOverlay">
@@ -1535,16 +1510,6 @@
       renderLedgerManageTable();
       populateSettingsForm();
     }
-
-    function fillPrintBanner() {
-      const sch = appData.school || {};
-      const cfg = BOOK_CONFIG[sch.bookType] || BOOK_CONFIG['SMC'];
-      document.getElementById('pbSchool').textContent = sch.name || 'શાળા રોજમેળ';
-      document.getElementById('pbUdise').textContent = sch.udise || '-';
-      document.getElementById('pbYear').textContent = sch.year || '-';
-      document.getElementById('pbBook').textContent = cfg.name;
-    }
-    window.addEventListener('beforeprint', fillPrintBanner);   // badhi print rite (button, Ctrl+P) ma chale
 
     function triggerPrintCurrentTab() {
       const activeTab = document.querySelector('.tab-pane.active');
