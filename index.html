@@ -363,12 +363,12 @@
         <button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button>
       </div>
       <div class="card">
-        <div style="text-align:center; margin-bottom:12px;"><h2>પરિશિષ્ટ– ૦૯</h2><p>તા.૩૧-૦૩-<span class="dynEndYear">-</span> ની સ્થિતિએ બેંક સાથે મેળવણું (<span class="dynBookNameLabel">-</span>)</p></div>
+        <div style="text-align:center; margin-bottom:12px;"><h2 class="schInfoName">-</h2><h3>પરિશિષ્ટ– ૦૯</h3><p>તા.૩૧-૦૩-<span class="dynEndYear">-</span> ની સ્થિતિએ બેંક સાથે મેળવણું (<span class="dynBookNameLabel">-</span>)</p></div>
         <div class="table-container" style="margin-bottom:12px;">
           <table>
-            <tr><td width="20%"><strong>શાળા / સમિતિ:</strong></td><td width="30%" id="p9SchoolName">-</td><td width="20%"><strong>સી.આર.સી.:</strong></td><td width="30%" id="p9Crc">-</td></tr>
-            <tr><td><strong>ખાતા નંબર:</strong></td><td id="p9BankAcc">-</td><td><strong>બેંકનું નામ:</strong></td><td id="p9BankName">-</td></tr>
-            <tr><td><strong>ડાયસ કોડ:</strong></td><td id="p9Udise">-</td><td><strong>તાલુકો:</strong></td><td id="p9Taluka">-</td></tr>
+            <tr><td width="20%"><strong>શાળા / સમિતિ:</strong></td><td width="30%" class="schInfoName">-</td><td width="20%"><strong>સી.આર.સી.:</strong></td><td width="30%" class="schInfoCrc">-</td></tr>
+            <tr><td><strong>ખાતા નંબર:</strong></td><td class="schInfoAcc">-</td><td><strong>બેંકનું નામ:</strong></td><td class="schInfoBank">-</td></tr>
+            <tr><td><strong>ડાયસ કોડ:</strong></td><td class="schInfoUdise">-</td><td><strong>તાલુકો:</strong></td><td class="schInfoTaluka">-</td></tr>
           </table>
         </div>
         <div class="table-container">
@@ -392,7 +392,14 @@
         <div style="display:flex; gap:10px; align-items:center;"><label><input type="checkbox" id="p10ActiveOnlyToggle" onchange="renderParishisht10()"> સક્રિય લેજર</label><button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button></div>
       </div>
       <div class="card">
-        <div style="text-align:center; margin-bottom:12px;"><h2>પરિશિષ્ટ– ૧૦</h2><p>નાણાકીય વર્ષ <span class="dynFullYear">-</span> (<span class="dynBookNameLabel">-</span>)</p></div>
+        <div style="text-align:center; margin-bottom:12px;"><h2 class="schInfoName">-</h2><h3>પરિશિષ્ટ– ૧૦</h3><p>નાણાકીય વર્ષ <span class="dynFullYear">-</span> (<span class="dynBookNameLabel">-</span>)</p></div>
+        <div class="table-container" style="margin-bottom:12px;">
+          <table>
+            <tr><td width="20%"><strong>શાળા / સમિતિ:</strong></td><td width="30%" class="schInfoName">-</td><td width="20%"><strong>સી.આર.સી.:</strong></td><td width="30%" class="schInfoCrc">-</td></tr>
+            <tr><td><strong>ખાતા નંબર:</strong></td><td class="schInfoAcc">-</td><td><strong>બેંકનું નામ:</strong></td><td class="schInfoBank">-</td></tr>
+            <tr><td><strong>ડાયસ કોડ:</strong></td><td class="schInfoUdise">-</td><td><strong>તાલુકો:</strong></td><td class="schInfoTaluka">-</td></tr>
+          </table>
+        </div>
         <div class="table-container">
           <table>
             <thead><tr><th width="5%">ક્રમ</th><th width="23%" class="text-left">ખાતાનું નામ</th><th width="12%" class="text-right">શરૂઆત સિલક</th><th width="12%" class="text-right">મળેલ ગ્રાન્ટ</th><th width="12%" class="text-right">કુલ રકમ</th><th width="12%" class="text-right">ખર્ચ</th><th width="10%" class="text-right">પરત</th><th width="14%" class="text-right">બંધ સિલક</th></tr></thead>
@@ -837,7 +844,9 @@
           const parsed = JSON.parse(saved);
           const currentSchool = Object.assign({}, appData.school);
           appData = Object.assign({}, appData, parsed);
-          appData.school = Object.assign({}, appData.school, currentSchool);
+          const nonEmpty = {};
+          Object.keys(currentSchool).forEach(k => { if (currentSchool[k] !== '' && currentSchool[k] !== null && currentSchool[k] !== undefined) nonEmpty[k] = currentSchool[k]; });
+          appData.school = Object.assign({}, appData.school, nonEmpty);
         } catch(e) {}
       } else {
         const cfg = BOOK_CONFIG[appData.school.bookType] || BOOK_CONFIG['SMC'];
@@ -1306,14 +1315,16 @@
       tbody.innerHTML = html;
     }
 
+    function fillSchoolInfoBoxes() {
+      const sch = appData.school || {};
+      const v = x => (x && String(x).trim()) ? x : '-';
+      const map = { schInfoName: sch.name, schInfoCrc: sch.crc, schInfoAcc: sch.bankAccount, schInfoBank: sch.bankName, schInfoUdise: sch.udise, schInfoTaluka: sch.taluka };
+      Object.keys(map).forEach(c => document.querySelectorAll('.' + c).forEach(el => el.innerText = v(map[c])));
+    }
+
     function renderParishisht9() {
       const sch = appData.school;
-      document.getElementById('p9SchoolName').innerText = sch.name;
-      document.getElementById('p9Crc').innerText = sch.crc;
-      document.getElementById('p9BankAcc').innerText = sch.bankAccount;
-      document.getElementById('p9BankName').innerText = sch.bankName;
-      document.getElementById('p9Udise').innerText = sch.udise;
-      document.getElementById('p9Taluka').innerText = sch.taluka;
+      fillSchoolInfoBoxes();
       const endYr = (sch.year || '2025-2026').split('-')[1] || '2026';
       document.querySelectorAll('.dynEndYear').forEach(el => el.innerText = endYr);
       let totOp = appData.ledgers.reduce((acc, l) => acc + (parseFloat(l.opening) || 0), 0);
@@ -1326,6 +1337,8 @@
     }
 
     function renderParishisht10() {
+      fillSchoolInfoBoxes();
+      document.querySelectorAll('.dynFullYear').forEach(el => el.innerText = (appData.school.year || '2025-2026'));
       const activeOnly = document.getElementById('p10ActiveOnlyToggle').checked;
       const tbody = document.getElementById('p10TableBody'); tbody.innerHTML = '';
       let sumOp = 0, sumInc = 0, sumComb = 0, sumExp = 0, sumCl = 0;
