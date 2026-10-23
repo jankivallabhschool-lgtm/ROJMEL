@@ -70,7 +70,7 @@
     .status-badge { font-size: 0.78rem; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; background: #16a34a; color: white; }
     
     .nav-container { background: white; border-bottom: 1px solid var(--border-color); padding: 8px 16px; position: sticky; top: 0; z-index: 40; }
-    .main-nav { max-width: 1380px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .main-nav { max-width: 1380px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
     @media (max-width: 1024px) { .main-nav { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 640px) { .main-nav { grid-template-columns: repeat(2, 1fr); } }
     .nav-btn {
@@ -126,7 +126,44 @@
     .modal-header { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
     .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 
+
+
+    /* REPORT HEADER BANNER */
+    .rpt-head { background: linear-gradient(135deg, #1e3a8a 0%, #0369a1 100%); color: #ffffff; border-radius: 12px; padding: 12px 16px 10px; text-align: center; margin-bottom: 12px; border-bottom: 4px solid #f59e0b; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rpt-school { font-size: 1.3rem; font-weight: 800; line-height: 1.3; }
+    .rpt-title { display: inline-block; background: #fff7ed; color: #9a3412; font-weight: 800; font-size: 1rem; padding: 3px 18px; border-radius: 20px; margin: 6px 0 5px; border: 1.5px solid #f59e0b; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rpt-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+    .rpt-chip { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.45); padding: 2px 11px; border-radius: 14px; font-size: 0.8rem; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    /* UTC */
+    @page utcPortrait { size: A4 portrait; margin: 12mm; }
+    #utcTab { page: utcPortrait; }
+    .utc-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 14px; margin-top: 10px; }
+    .utc-pick label { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; cursor: pointer; font-size: 0.88rem; font-weight: 600; }
+    .utc-pick label.on { background: #eff6ff; border-color: #93c5fd; }
+    .utc-pick input { width: 17px; height: 17px; cursor: pointer; }
+    .utc-pick .utc-amt { margin-left: auto; font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+    .utc-head { text-align: center; margin-bottom: 14px; }
+    .utc-head h2 { font-size: 1.15rem; font-weight: 800; }
+    .utc-head h3 { font-size: 1.02rem; font-weight: 700; }
+    .utc-text { font-size: 0.95rem; line-height: 1.9; text-align: justify; margin-bottom: 14px; }
+    .utc-table { width: 100%; border-collapse: collapse; }
+    .utc-table th, .utc-table td { border: 1px solid #1e293b; padding: 7px 8px; text-align: center; font-size: 0.9rem; }
+    .utc-table th { background: #f1f5f9; font-weight: 700; }
+    .utc-table td.utc-name { text-align: center; font-weight: 700; }
+    .utc-foot { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; gap: 20px; }
+    .utc-sign { text-align: center; font-weight: 700; font-size: 0.85rem; min-width: 220px; line-height: 1.5; }
+    .utc-sign .utc-sign-space { height: 56px; }
+
     @media print {
+      .rpt-head { padding: 7px 12px 6px; margin-bottom: 8px; }
+      .rpt-school { font-size: 14pt; }
+      .rpt-title { font-size: 11.5pt; padding: 2px 14px; }
+      .rpt-chip { font-size: 8.5pt; padding: 1px 9px; }
+      #utcTab .utc-table th, #utcTab .utc-table td { font-size: 10.5pt !important; padding: 6px 6px !important; }
+      #utcTab .utc-text { font-size: 11pt; }
+      #utcTab .utc-head h2 { font-size: 14pt; }
+      #utcTab .utc-head h3 { font-size: 12.5pt; }
       body { background: white; color: black; font-size: 9.5pt; }
       .no-print, .app-header, .nav-container, #loginScreenOverlay, .modal-overlay { display: none !important; }
       .tab-pane { display: none !important; }
@@ -240,7 +277,7 @@
     </div>
   </div>
 
-  <!-- ==================== 10-TAB NAVIGATION ==================== -->
+  <!-- ==================== 11-TAB NAVIGATION ==================== -->
   <div class="nav-container no-print">
     <nav class="main-nav">
       <button class="nav-btn active" onclick="switchTab('entryTab')"><i class="fa-solid fa-keyboard"></i> ૧. ડેટા એન્ટ્રી</button>
@@ -252,7 +289,8 @@
       <button class="nav-btn" onclick="switchTab('billRegisterTab')"><i class="fa-solid fa-file-invoice"></i> ૭. બિલ રજીસ્ટર</button>
       <button class="nav-btn" onclick="switchTab('chequeRegisterTab')"><i class="fa-solid fa-money-check"></i> ૮. ચેક રજીસ્ટર</button>
       <button class="nav-btn" onclick="switchTab('ledgerBookTab')"><i class="fa-solid fa-book-journal-whills"></i> ૯. ખાતાવહી</button>
-      <button class="nav-btn" onclick="switchTab('settingsTab')"><i class="fa-solid fa-gear"></i> ૧૦. સેટિંગ્સ & બેકઅપ</button>
+      <button class="nav-btn" onclick="switchTab('utcTab')"><i class="fa-solid fa-certificate"></i> ૧૦. UTC</button>
+      <button class="nav-btn" onclick="switchTab('settingsTab')"><i class="fa-solid fa-gear"></i> ૧૧. સેટિંગ્સ & બેકઅપ</button>
     </nav>
   </div>
 
@@ -350,7 +388,7 @@
         <button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button>
       </div>
       <div class="card">
-        <div style="text-align:center; margin-bottom:14px;"><h2 id="p8SchoolName">-</h2><h3>પરિશિષ્ટ: ૮</h3><p>વર્ષ <span id="p8Year">-</span> આવક-ખર્ચ પત્રક (<span class="dynBookNameLabel">-</span>)</p></div>
+        <div class="rpt-slot" data-kind="p8"></div>
         <div class="table-container"><table><thead><tr><th width="8%">ક્રમ</th><th width="62%" class="text-left">વિગત</th><th width="30%" class="text-right">રકમ (₹)</th></tr></thead><tbody id="p8TableBody"></tbody></table></div>
         <div class="sign-row"><div class="sign-box">તૈયાર કરનાર શિક્ષક</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
       </div>
@@ -363,7 +401,7 @@
         <button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button>
       </div>
       <div class="card">
-        <div style="text-align:center; margin-bottom:12px;"><h2 class="schInfoName">-</h2><h3>પરિશિષ્ટ– ૦૯</h3><p>તા.૩૧-૦૩-<span class="dynEndYear">-</span> ની સ્થિતિએ બેંક સાથે મેળવણું (<span class="dynBookNameLabel">-</span>)</p></div>
+        <div class="rpt-slot" data-kind="p9"></div>
         <div class="table-container" style="margin-bottom:12px;">
           <table>
             <tr><td width="20%"><strong>શાળા / સમિતિ:</strong></td><td width="30%" class="schInfoName">-</td><td width="20%"><strong>સી.આર.સી.:</strong></td><td width="30%" class="schInfoCrc">-</td></tr>
@@ -392,7 +430,7 @@
         <div style="display:flex; gap:10px; align-items:center;"><label><input type="checkbox" id="p10ActiveOnlyToggle" onchange="renderParishisht10()"> સક્રિય લેજર</label><button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button></div>
       </div>
       <div class="card">
-        <div style="text-align:center; margin-bottom:12px;"><h2 class="schInfoName">-</h2><h3>પરિશિષ્ટ– ૧૦</h3><p>નાણાકીય વર્ષ <span class="dynFullYear">-</span> (<span class="dynBookNameLabel">-</span>)</p></div>
+        <div class="rpt-slot" data-kind="p10"></div>
         <div class="table-container" style="margin-bottom:12px;">
           <table>
             <tr><td width="20%"><strong>શાળા / સમિતિ:</strong></td><td width="30%" class="schInfoName">-</td><td width="20%"><strong>સી.આર.સી.:</strong></td><td width="30%" class="schInfoCrc">-</td></tr>
@@ -418,7 +456,7 @@
         <button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button>
       </div>
       <div class="card">
-        <div style="text-align:center; margin-bottom:12px;"><h2 id="billRegSchoolHeader">-</h2><h3>બિલ રજીસ્ટર (<span class="dynBookNameLabel">-</span>)</h3></div>
+        <div class="rpt-slot" data-kind="bill"></div>
         <div class="table-container">
           <table>
             <thead><tr><th width="6%">બિલ નં.</th><th width="10%">તારીખ</th><th width="22%" class="text-left">બિલની વિગત</th><th width="22%" class="text-left">કોના તરફથી મળેલ</th><th width="12%" class="text-right">બિલ રકમ</th><th width="10%">ચેક નં.</th><th width="12%" class="text-right">ચુકવેલ રકમ</th><th width="6%">સહી</th></tr></thead>
@@ -437,7 +475,7 @@
         <button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button>
       </div>
       <div class="card">
-        <div style="text-align:center; margin-bottom:12px;"><h2 id="chequeRegSchoolHeader">-</h2><h3>ચેક ઇસ્યુ રજીસ્ટર (<span class="dynBookNameLabel">-</span>)</h3></div>
+        <div class="rpt-slot" data-kind="cheque"></div>
         <div class="table-container">
           <table>
             <thead><tr><th width="10%">તારીખ</th><th width="10%">ચેક નં.</th><th width="8%">વાઉચર</th><th width="28%" class="text-left">કોના નામે ચેક લખ્યો</th><th width="14%" class="text-right">રકમ (₹)</th><th width="22%" class="text-left">વિગત</th><th width="8%">સહી</th></tr></thead>
@@ -461,7 +499,56 @@
       <div id="ledgerBookContainer"></div>
     </section>
 
-    <!-- TAB 10: SETTINGS & BACKUP -->
+    <!-- TAB 10: UTC (ગ્રાન્ટ વપરાશનું પ્રમાણપત્ર) -->
+    <section id="utcTab" class="tab-pane">
+      <div class="card no-print">
+        <div class="card-title"><span><i class="fa-solid fa-certificate"></i> UTC - ગ્રાન્ટ વપરાશનું પ્રમાણપત્ર</span><button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button></div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+          <div class="form-group" style="min-width:200px;"><label>માસ અંતિત (માસ પસંદ કરો)</label>
+            <select id="utcMonthSelect" class="form-control" onchange="renderUtc()">
+              <option value="4">એપ્રિલ</option><option value="5">મે</option><option value="6">જૂન</option>
+              <option value="7">જુલાઈ</option><option value="8">ઓગસ્ટ</option><option value="9">સપ્ટેમ્બર</option>
+              <option value="10">ઓક્ટોબર</option><option value="11">નવેમ્બર</option><option value="12">ડિસેમ્બર</option>
+              <option value="1">જાન્યુઆરી</option><option value="2">ફેબ્રુઆરી</option><option value="3">માર્ચ</option>
+            </select>
+          </div>
+          <div class="form-group" style="min-width:180px;"><label>પ્રમાણપત્રની તારીખ</label><input type="date" id="utcDateInput" class="form-control" onchange="renderUtc()"></div>
+          <div style="display:flex; gap:8px; padding-bottom:2px;">
+            <button type="button" class="btn btn-sm btn-outline" onclick="utcSelectAll(true)">બધા પસંદ કરો</button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="utcSelectAll(false)">બધા કાઢો</button>
+          </div>
+        </div>
+        <div style="margin-top:12px; font-weight:700; font-size:0.9rem;">લેજર પસંદ કરો (ચેકબોક્સ સિલેક્ટ કરતા જ નીચે UTC બની જશે):</div>
+        <div id="utcLedgerPick" class="utc-pick"></div>
+      </div>
+
+      <div class="card" id="utcCertificate">
+        <div id="utcHead"></div>
+        <p class="utc-text" id="utcParagraph"></p>
+        <table class="utc-table">
+          <thead>
+            <tr>
+              <th width="8%">Sr No</th>
+              <th width="32%">Name of Activity/ Grant</th>
+              <th width="20%">મળેલ કુલ ગ્રાન્ટ (લીમીટ)</th>
+              <th width="22%" id="utcSpentHead">ખર્ચ</th>
+              <th width="18%">બચત રહેલ ગ્રાન્ટ (લીમીટ)</th>
+            </tr>
+          </thead>
+          <tbody id="utcTableBody"></tbody>
+        </table>
+        <div class="utc-foot">
+          <div style="font-size:0.92rem; font-weight:600;">તારીખ :- <span id="utcDateText">-</span></div>
+          <div class="utc-sign">
+            <div class="utc-sign-space"></div>
+            <div>PRINCIPAL</div>
+            <div class="schInfoName">-</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 11: SETTINGS & BACKUP -->
     <section id="settingsTab" class="tab-pane">
       <div class="card">
         <div class="card-title"><span><i class="fa-solid fa-school-flag"></i> શાળા પ્રોફાઇલ અને સામાન્ય સેટિંગ્સ</span></div>
@@ -874,6 +961,7 @@
     }
 
     function switchTab(tabId) {
+      fillReportHeaders();
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active', 'print-active'));
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
       const target = document.getElementById(tabId);
@@ -890,6 +978,7 @@
       if (tabId === 'chequeRegisterTab') renderChequeRegister();
       if (tabId === 'ledgerBookTab') renderLedgerBook();
       if (tabId === 'ledgerManageTab') renderLedgerManageTable();
+      if (tabId === 'utcTab') renderUtc();
       if (tabId === 'settingsTab') populateSettingsForm();
     }
 
@@ -1244,7 +1333,7 @@
         `;
 
         card.innerHTML = `
-          <div class="month-book-header"><h3>${appData.school.name} - ${bookCfg.name}</h3><p><strong>માસ: ${m.gu} (${m.name}) - ${shownYear}</strong> | વર્ષ: ${appData.school.year} | U-DISE: ${appData.school.udise}</p></div>
+          ${rptHead('રોજમેળ - ' + m.gu + ' (' + m.name + ') ' + shownYear, ['માસ: ' + m.gu + ' ' + shownYear])}
           <div class="table-container"><table><thead><tr><th colspan="6" style="background:#e2e8f0;">આવક બાજુ (જમા - Receipts)</th><th colspan="6" style="background:#fee2e2;">ખર્ચ બાજુ (ઉધાર - Payments)</th></tr><tr><th width="8%">તારીખ</th><th width="12%">વર્ગીકરણ</th><th width="14%">વિગત</th><th width="6%">રોકડ ₹</th><th width="7%">બેંક ₹</th><th width="7%">કુલ ₹</th><th width="8%">તારીખ</th><th width="16%">વિગત</th><th width="6%">ચેક નં.</th><th width="5%">વાઉચર</th><th width="6%">રોકડ ₹</th><th width="7%">બેંક ₹</th></tr></thead><tbody>${rows}</tbody></table></div>
           <div class="sign-row"><div class="sign-box">તૈયાર કરનાર શિક્ષક</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
         `;
@@ -1282,7 +1371,7 @@
       `;
 
       card.innerHTML = `
-        <div class="month-book-header"><h3>${appData.school.name} - વાર્ષિક સળંગ ${bookCfg.name} (April to March)</h3><p>વર્ષ: ${appData.school.year} | U-DISE: ${appData.school.udise}</p></div>
+        ${rptHead('વાર્ષિક સળંગ રોજમેળ (April to March)')}
         <div class="table-container"><table><thead><tr><th colspan="6" style="background:#e2e8f0;">આવક બાજુ (જમા - Receipts)</th><th colspan="6" style="background:#fee2e2;">ખર્ચ બાજુ (ઉધાર - Payments)</th></tr><tr><th width="8%">તારીખ</th><th width="12%">વર્ગીકરણ</th><th width="14%">વિગત</th><th width="6%">રોકડ ₹</th><th width="7%">બેંક ₹</th><th width="7%">કુલ ₹</th><th width="8%">તારીખ</th><th width="16%">વિગત</th><th width="6%">ચેક નં.</th><th width="5%">વાઉચર</th><th width="6%">રોકડ ₹</th><th width="7%">બેંક ₹</th></tr></thead><tbody>${rows}</tbody></table></div>
         <div class="sign-row"><div class="sign-box">તૈયાર કરનાર શિક્ષક</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
       `;
@@ -1293,8 +1382,6 @@
     function printAnnualContinuousAction() { document.getElementById('cashbookViewMode').value = 'ANNUAL_CONTINUOUS'; handleViewModeChange(); triggerPrintCurrentTab(); }
 
     function renderParishisht8() {
-      document.getElementById('p8SchoolName').innerText = appData.school.name;
-      document.getElementById('p8Year').innerText = appData.school.year;
       const tbody = document.getElementById('p8TableBody'); tbody.innerHTML = '';
       let totOp = appData.ledgers.reduce((acc, l) => acc + (parseFloat(l.opening) || 0), 0);
       let totInc = 0, totExp = 0;
@@ -1362,7 +1449,6 @@
     }
 
     function renderBillRegister() {
-      document.getElementById('billRegSchoolHeader').innerText = appData.school.name;
       const tbody = document.getElementById('billRegTableBody'); tbody.innerHTML = '';
       sortAndRecalculateVouchers();
       const expenses = appData.transactions.filter(t => t.type === 'expense')
@@ -1379,7 +1465,6 @@
     }
 
     function renderChequeRegister() {
-      document.getElementById('chequeRegSchoolHeader').innerText = appData.school.name;
       const tbody = document.getElementById('chequeRegTableBody'); tbody.innerHTML = '';
       const bankExp = appData.transactions.filter(t => t.type === 'expense' && (t.mode === 'Bank' || t.chequeNo));
       let tot = 0;
@@ -1414,7 +1499,7 @@
         const card = document.createElement('div');
         card.className = "card page-break-always";
         card.innerHTML = `
-          <div style="text-align:center; margin-bottom:10px;"><h2>${appData.school.name}</h2><h3>ખાતાવહી: ${l.name}</h3><p>વર્ષ: ${appData.school.year}</p></div>
+          ${rptHead('ખાતાવહી: ' + l.name)}
           <div class="table-container"><table><thead><tr><th width="10%">તારીખ</th><th width="20%" class="text-left">પાર્ટી</th><th width="18%" class="text-left">વિગત</th><th width="7%">વાઉચર</th><th width="9%">ચેક/બિલ</th><th width="12%" class="text-right">જમા ₹</th><th width="12%" class="text-right">ઉધાર ₹</th><th width="12%" class="text-right">સિલક ₹</th></tr></thead><tbody>${rows}</tbody></table></div>
           <div class="sign-row"><div class="sign-box">તૈયાર કરનાર શિક્ષક</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
         `;
@@ -1514,6 +1599,7 @@
     }
 
     function refreshAllViews() {
+      fillReportHeaders();
       sortAndRecalculateVouchers();
       updateBillNoPlaceholder();
       updateHeaderBadges();
@@ -1522,6 +1608,177 @@
       renderTransactionsTable();
       renderLedgerManageTable();
       populateSettingsForm();
+    }
+
+
+    // ===================== UTC (ગ્રાન્ટ વપરાશનું પ્રમાણપત્ર) =====================
+    const UTC_ONES = ['શૂન્ય','એક','બે','ત્રણ','ચાર','પાંચ','છ','સાત','આઠ','નવ','દસ','અગિયાર','બાર','તેર','ચૌદ','પંદર','સોળ','સત્તર','અઢાર','ઓગણીસ',
+      'વીસ','એકવીસ','બાવીસ','ત્રેવીસ','ચોવીસ','પચ્ચીસ','છવ્વીસ','સત્તાવીસ','અઠ્ઠાવીસ','ઓગણત્રીસ','ત્રીસ','એકત્રીસ','બત્રીસ','તેત્રીસ','ચોત્રીસ','પાંત્રીસ','છત્રીસ','સાડત્રીસ','આડત્રીસ','ઓગણચાલીસ',
+      'ચાલીસ','એકતાલીસ','બેતાલીસ','ત્રેતાલીસ','ચુમ્માલીસ','પિસ્તાલીસ','છેતાલીસ','સુડતાલીસ','અડતાલીસ','ઓગણપચાસ','પચાસ','એકાવન','બાવન','ત્રેપન','ચોપન','પંચાવન','છપ્પન','સત્તાવન','અઠ્ઠાવન','ઓગણસાઠ',
+      'સાઈઠ','એકસઠ','બાસઠ','ત્રેસઠ','ચોસઠ','પાંસઠ','છાસઠ','સડસઠ','અડસઠ','ઓગણોતેર','સિત્તેર','એકોતેર','બોતેર','તોતેર','ચુમોતેર','પંચોતેર','છોતેર','સિત્યોતેર','ઇઠ્યોતેર','ઓગણએંસી',
+      'એંસી','એક્યાસી','બ્યાસી','ત્યાસી','ચોર્યાસી','પંચાસી','છ્યાસી','સિત્યાસી','અઠ્યાસી','નેવ્યાસી','નેવું','એકાણું','બાણું','ત્રાણું','ચોરાણું','પંચાણું','છન્નું','સત્તાણું','અઠ્ઠાણું','નવ્વાણું'];
+    const UTC_HUNDREDS = ['','એકસો','બસો','ત્રણસો','ચારસો','પાંચસો','છસો','સાતસો','આઠસો','નવસો'];
+
+    function utcBelowThousand(n) {
+      const h = Math.floor(n / 100), r = n % 100;
+      const parts = [];
+      if (h) parts.push(UTC_HUNDREDS[h]);
+      if (r) parts.push(UTC_ONES[r]);
+      return parts.join(' ');
+    }
+
+    function utcIntToGujWords(n) {
+      n = Math.floor(Math.abs(n));
+      if (n === 0) return 'શૂન્ય';
+      const parts = [];
+      const crore = Math.floor(n / 10000000); n %= 10000000;
+      const lakh = Math.floor(n / 100000); n %= 100000;
+      const thousand = Math.floor(n / 1000); n %= 1000;
+      if (crore) parts.push(UTC_ONES[crore % 100] + ' કરોડ');
+      if (lakh) parts.push(UTC_ONES[lakh] + ' લાખ');
+      if (thousand) parts.push(UTC_ONES[thousand] + ' હજાર');
+      if (n) parts.push(utcBelowThousand(n));
+      return parts.join(' ');
+    }
+
+    // રકમ -> "(અંકે રૂપિયા ... ફક્ત)"
+    function utcAmountWords(amount) {
+      const total = Math.round((parseFloat(amount) || 0) * 100);
+      const rupees = Math.floor(total / 100), paise = total % 100;
+      let txt = 'અંકે રૂપિયા ' + utcIntToGujWords(rupees);
+      if (paise) txt += ' અને ' + UTC_ONES[paise] + ' પૈસા';
+      return '(' + txt + ' ફક્ત.)';
+    }
+
+    function utcFmt(val) {
+      const n = Math.round((parseFloat(val) || 0) * 100) / 100;
+      return Number.isInteger(n) ? String(n) : n.toFixed(2);
+    }
+
+    let utcSelected = new Set();
+
+    function utcEnsureControls() {
+      const mSel = document.getElementById('utcMonthSelect');
+      if (!mSel.dataset.init) {
+        mSel.value = String(new Date().getMonth() + 1);
+        mSel.dataset.init = '1';
+      }
+      const dIn = document.getElementById('utcDateInput');
+      if (!dIn.value) {
+        const d = new Date();
+        dIn.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+    }
+
+    function utcPeriod() {
+      const mNum = parseInt(document.getElementById('utcMonthSelect').value, 10);
+      const m = MONTH_ORDER.find(x => x.num === mNum) || MONTH_ORDER[0];
+      const startYr = parseInt((appData.school.year || '2025-2026').split('-')[0]) || 2025;
+      const calYear = (m.num >= 4) ? startYr : (startYr + 1);
+      const lastDay = new Date(calYear, m.num, 0).getDate();
+      const endDate = calYear + '-' + String(m.num).padStart(2, '0') + '-' + String(lastDay).padStart(2, '0');
+      return { m, calYear, lastDay, endDate };
+    }
+
+    function utcCalc(ledger, endDate) {
+      let inc = 0, exp = 0;
+      appData.transactions.forEach(t => {
+        if (t.ledger !== ledger.name || !t.date || t.date > endDate) return;
+        if (t.type === 'income') inc += (parseFloat(t.amount) || 0); else exp += (parseFloat(t.amount) || 0);
+      });
+      const received = (parseFloat(ledger.opening) || 0) + inc;
+      return { received, spent: exp, balance: received - exp };
+    }
+
+    function utcToggle(name, checked) {
+      if (checked) utcSelected.add(name); else utcSelected.delete(name);
+      renderUtc();
+    }
+
+    function utcSelectAll(flag) {
+      utcSelected = new Set(flag ? appData.ledgers.map(l => l.name) : []);
+      renderUtc();
+    }
+
+    function renderUtc() {
+      utcEnsureControls();
+      fillSchoolInfoBoxes();
+      const sch = appData.school;
+      const { m, calYear, lastDay, endDate } = utcPeriod();
+      const endDisp = String(lastDay).padStart(2, '0') + '-' + String(m.num).padStart(2, '0') + '-' + calYear;
+
+      // માત્ર હાલમાં અસ્તિત્વમાં હોય તેવા લેજર જ પસંદગીમાં રાખો
+      const names = new Set(appData.ledgers.map(l => l.name));
+      utcSelected = new Set([...utcSelected].filter(n => names.has(n)));
+
+      // ચેકબોક્સ યાદી
+      const pick = document.getElementById('utcLedgerPick');
+      pick.innerHTML = '';
+      appData.ledgers.forEach((l, i) => {
+        const c = utcCalc(l, endDate);
+        const lab = document.createElement('label');
+        if (utcSelected.has(l.name)) lab.className = 'on';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.checked = utcSelected.has(l.name);
+        cb.addEventListener('change', () => utcToggle(l.name, cb.checked));
+        const nm = document.createElement('span'); nm.textContent = l.name;
+        const am = document.createElement('span'); am.className = 'utc-amt'; am.textContent = '₹ ' + utcFmt(c.received);
+        lab.append(cb, nm, am);
+        pick.appendChild(lab);
+      });
+      if (!appData.ledgers.length) pick.innerHTML = '<div style="color:var(--text-muted);">કોઈ લેજર ઉપલબ્ધ નથી.</div>';
+
+      // હેડિંગ
+      document.getElementById('utcHead').innerHTML = rptHead('UTC - ગ્રાન્ટ વપરાશનું પ્રમાણપત્ર', ['માસ અંતિત: ' + m.gu + ' ' + calYear]);
+      document.getElementById('utcSpentHead').innerHTML = `તા.${endDisp} સુધીમાં<br>ખર્ચ`;
+      const dv = document.getElementById('utcDateInput').value;
+      document.getElementById('utcDateText').innerText = dv ? dv.split('-').reverse().join('-') : '-';
+
+      // ટેબલ
+      const tbody = document.getElementById('utcTableBody');
+      const selected = appData.ledgers.filter(l => utcSelected.has(l.name));
+      let totR = 0, totS = 0, totB = 0, rows = '';
+      selected.forEach((l, i) => {
+        const c = utcCalc(l, endDate);
+        totR += c.received; totS += c.spent; totB += c.balance;
+        rows += `<tr><td>${i + 1}</td><td class="utc-name">${l.name}</td><td>${utcFmt(c.received)}</td><td>${utcFmt(c.spent)}</td><td>${utcFmt(c.balance)}</td></tr>`;
+      });
+      if (!selected.length) {
+        rows = '<tr><td colspan="5" style="padding:22px; color:var(--text-muted);">ઉપરથી એક કે વધુ લેજર પસંદ કરો.</td></tr>';
+      } else {
+        rows += `<tr style="font-weight:800; background:#f8fafc;"><td></td><td></td><td>${utcFmt(totR)}</td><td>${utcFmt(totS)}</td><td>${utcFmt(totB)}</td></tr>`;
+      }
+      tbody.innerHTML = rows;
+
+      // પ્રમાણપત્રનું લખાણ
+      const crc = (sch.crc && String(sch.crc).trim()) ? sch.crc : '-';
+      const R = utcFmt(totR), S = utcFmt(totS), B = utcFmt(totB);
+      document.getElementById('utcParagraph').innerHTML =
+        `આથી પ્રમાણપત્ર આપવામાં આવે છે કે, સમગ્ર શિક્ષા, _______________________ અંતર્ગત વર્ષ: ${sch.year || ''} માં નીચેની વિગતે એકંદરીત કુલ રૂપિયા <b>${R}/-</b> ${utcAmountWords(totR)} ની ગ્રાન્ટ ${crc} ક્લસ્ટર ${sch.name || ''} ને મળેલ છે. જે પૈકી શાળા તરફથી નીચે મુજબ એકંદરીત કુલ રૂપિયા <b>${S}/-</b> ${utcAmountWords(totS)} ખર્ચ થયેલ છે. સદર ખર્ચ શાળાએ PFMS દ્વારા જ ખર્ચ કરેલ છે. બચત રહેલ ગ્રાન્ટ રૂપિયા <b>${B}/-</b> ${utcAmountWords(totB)} છે. ખર્ચના આંકડા સબંધિત હિસાબી રેકર્ડ સાથે ચકાસણી કરીને દર્શાવેલ છે.`;
+    }
+
+
+    // ===================== પત્રકોનું આકર્ષક હેડિંગ =====================
+    function rptHead(title, extraChips) {
+      const sch = appData.school || {};
+      const cfg = BOOK_CONFIG[sch.bookType] || BOOK_CONFIG['SMC'];
+      const chips = ['U-DISE કોડ: ' + (sch.udise || '-'), 'નાણાકીય વર્ષ: ' + (sch.year || '-'), cfg.name].concat(extraChips || []);
+      return `<div class="rpt-head"><div class="rpt-school">${sch.name || 'શાળા'}</div><div class="rpt-title">${title}</div><div class="rpt-meta">${chips.map(c => `<span class="rpt-chip">${c}</span>`).join('')}</div></div>`;
+    }
+
+    function fillReportHeaders() {
+      const endYr = ((appData.school.year || '').split('-')[1]) || '';
+      const map = {
+        p8: ['પરિશિષ્ટ: ૮ - આવક-ખર્ચ પત્રક', []],
+        p9: ['પરિશિષ્ટ: ૯ - બેંક સાથે મેળવણું (BRS)', ['તા.૩૧-૦૩-' + endYr + ' ની સ્થિતિએ']],
+        p10: ['પરિશિષ્ટ: ૧૦ - ગ્રાન્ટ વાઇઝ ખર્ચ', []],
+        bill: ['બિલ રજીસ્ટર', []],
+        cheque: ['ચેક ઇસ્યુ રજીસ્ટર', []]
+      };
+      document.querySelectorAll('.rpt-slot').forEach(el => {
+        const m = map[el.dataset.kind];
+        if (m) el.innerHTML = rptHead(m[0], m[1]);
+      });
     }
 
     function triggerPrintCurrentTab() {
