@@ -550,26 +550,39 @@
       const s = appData.school;
       return JSON.stringify(Object.assign({ udise: s.udise, pass: cloudPass, year: s.year, bookType: s.bookType }, extra));
     }
+    let cloudReadyKey = '';   // je book/year no cloud data safaltapurvak vanchai gayo hoy teni key
+    function currentCloudKey() {
+      const s = appData.school;
+      return [s.udise, s.year, s.bookType].join('|');
+    }
     async function cloudPull() {
       if (!cloudPass) return;
+      const key = currentCloudKey();
       try {
         setSyncStatus('☁ ક્લાઉડમાંથી ડેટા લાવી રહ્યા છીએ...', '#2563eb');
         const s = appData.school;
         const url = `${APPS_SCRIPT_URL}?action=loadData&udise=${encodeURIComponent(s.udise)}&pass=${encodeURIComponent(cloudPass)}&year=${encodeURIComponent(s.year)}&bookType=${encodeURIComponent(s.bookType)}`;
         const res = await fetch(url);
         const data = await res.json();
+        if (key !== currentCloudKey()) return; // vachche book/year badlai gayu hoy to jone ignore karo
         if (data && data.success && data.data) {
           const cloud = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
           const localTs = appData.updatedAt || 0;
+          cloudReadyKey = key;
           if ((cloud.updatedAt || 0) >= localTs) {
             const currentSchool = Object.assign({}, appData.school);
             appData = Object.assign({}, appData, cloud);
             appData.school = Object.assign({}, cloud.school || {}, currentSchool);
             localStorage.setItem(getActiveStorageKey(), JSON.stringify(appData));
+            setSyncStatus('☁ ક્લાઉડ સાથે સિંક ✓', '#16a34a');
+          } else {
+            cloudPush(); // phone no data navo che -> cloud ma upload
           }
-          setSyncStatus('☁ ક્લાઉડ સાથે સિંક ✓', '#16a34a');
         } else if (data && data.success) {
-          cloudPush(); // cloud ma haju data nathi -> local upload
+          cloudReadyKey = key;
+          // cloud ma haju data nathi -> fakt jo local ma kaik entry hoy to upload
+          if ((appData.transactions || []).length) cloudPush();
+          else setSyncStatus('☁ ક્લાઉડ સાથે સિંક ✓', '#16a34a');
         } else {
           setSyncStatus('☁ સિંક નિષ્ફળ', '#dc2626');
         }
@@ -581,6 +594,8 @@
     }
     async function cloudPush() {
       if (!cloudPass || !appData.school.udise) return;
+      // Cloud no data vanchya vagar upload nahi (khali data thi cloud overwrite na thay)
+      if (cloudReadyKey !== currentCloudKey()) { cloudPull(); return; }
       try {
         setSyncStatus('☁ સેવ થઈ રહ્યું છે...', '#2563eb');
         const res = await fetch(APPS_SCRIPT_URL, {
@@ -680,6 +695,12 @@
         const data = await res.json();
         if (data && data.success) {
           alertBox.className = 'login-alert success';
+          cloudPass = newPass;
+          try {
+            const sess = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
+            sess.pass = newPass;
+            sessionStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+          } catch (e) {}
           alertBox.innerText = 'નવો પાસવર્ડ સફળતાપૂર્વક અપડેટ થઈ ગયો છે!';
           alertBox.style.display = 'block';
           setTimeout(() => {
@@ -742,7 +763,9 @@
           }));
           await cloudPull();
 
-          saveAppData();
+          localStorage.setItem(getActiveStorageKey(), JSON.stringify(appData));
+          updateMetricsDashboard();
+          updateHeaderBadges();
           document.getElementById('loginScreenOverlay').style.display = 'none';
           refreshAllViews();
 
@@ -809,6 +832,7 @@
         appData.transactions = [];
         appData.ledgers = cfg.defaultLedgers.map(name => ({ name, opening: 0 }));
         appData.school.openingCash = 0;
+        appData.updatedAt = 0; // navi book: junu timestamp na rakho
       }
     }
 
