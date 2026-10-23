@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>શાળા રોજમેળ અને SMC હિસાબ પ્રણાલી</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #2563eb;
+      --primary-dark: #0f172a;
+      --accent: #0284c7;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --bg-main: #f1f5f9;
+      --card-bg: #ffffff;
+      --border-color: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --clr-cyan: #e0f2fe;
+      --clr-yellow: #fef9c3;
+      --clr-green: #dcfce7;
+      --clr-pink: #fce7f3;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Hind Vadodara', 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); line-height: 1.5; }
+
+    /* LOGIN SCREEN */
+    #loginScreenOverlay {
+      position: fixed; inset: 0; background: radial-gradient(circle at top right, #1e3a8a, #0b1329);
+      z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .login-card {
+      background: #ffffff; border-radius: 20px; max-width: 440px; width: 100%; padding: 32px 26px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45); text-align: center;
+    }
+    .login-badge {
+      width: 64px; height: 64px; background: #eff6ff; border: 2px solid #bfdbfe; border-radius: 50%;
+      color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 14px;
+    }
+    .login-title { font-size: 1.3rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 4px; }
+    .login-subtitle { font-size: 0.84rem; color: var(--text-muted); margin-bottom: 20px; }
+    .login-field { text-align: left; margin-bottom: 13px; }
+    .login-field label { display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 5px; }
+    .login-input, .form-control {
+      width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 0.92rem;
+    }
+    .login-input:focus, .form-control:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+    .login-btn {
+      width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 14px;
+    }
+    .login-alert { margin-top: 12px; padding: 10px; border-radius: 6px; font-size: 0.82rem; display: none; font-weight: 600; }
+    .login-alert.danger { background: #fee2e2; color: #b91c1c; border: 1px solid #f87171; }
+    .login-alert.info { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+    .login-alert.success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+
+    /* HEADER & NAV */
+    .app-header {
+      background: linear-gradient(135deg, #0f172a, #1e3a8a, #0369a1); color: white; padding: 12px 20px;
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .brand-section { display: flex; align-items: center; gap: 12px; }
+    .brand-icon { background: rgba(255, 255, 255, 0.18); width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .status-badge { font-size: 0.78rem; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; background: #16a34a; color: white; }
+    
+    .nav-container { background: white; border-bottom: 1px solid var(--border-color); padding: 8px 16px; position: sticky; top: 0; z-index: 40; }
+    .main-nav { max-width: 1380px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    @media (max-width: 1024px) { .main-nav { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 640px) { .main-nav { grid-template-columns: repeat(2, 1fr); } }
+    .nav-btn {
+      padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 7px; background: #f8fafc;
+      font-family: inherit; font-size: 0.82rem; font-weight: 600; color: #334155; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .nav-btn.active { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; border-color: var(--primary); }
+
+    .main-content { max-width: 1380px; margin: 16px auto; padding: 0 14px; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* CARDS & TABLES */
+    .card { background: white; border-radius: 10px; border: 1px solid var(--border-color); padding: 18px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .metric-card { background: white; border-radius: 10px; border: 1px solid var(--border-color); padding: 14px; display: flex; align-items: center; gap: 12px; }
+    .metric-icon { width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; }
+    .metric-info h4 { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; }
+    .metric-info .val { font-size: 1.2rem; font-weight: 800; color: var(--text-main); }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 0.84rem; font-weight: 600; color: #334155; }
+    
+    .btn { padding: 8px 14px; border-radius: 6px; font-family: inherit; font-size: 0.86rem; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-light); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-main); }
+    .btn-sm { padding: 4px 8px; font-size: 0.78rem; }
+
+    .table-container { width: 100%; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; background: white; }
+    th, td { border: 1px solid #cbd5e1; padding: 7px 9px; vertical-align: middle; }
+    th { background: #f8fafc; font-weight: 700; color: #1e293b; text-align: center; }
+    .text-center { text-align: center; } .text-right { text-align: right; } .text-left { text-align: left; } .font-bold { font-weight: 700; }
+    .row-cyan { background-color: var(--clr-cyan) !important; font-weight: 600; }
+    .row-yellow { background-color: var(--clr-yellow) !important; font-weight: 700; }
+    .row-green { background-color: var(--clr-green) !important; font-weight: 700; }
+    .row-pink { background-color: var(--clr-pink) !important; font-weight: 700; }
+
+    .month-book-card { border: 2px solid #0f172a; border-radius: 8px; background: white; margin-bottom: 24px; padding: 12px; }
+    .month-book-header { text-align: center; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 2px solid #1e293b; }
+    .month-book-header h3 { font-size: 1.1rem; font-weight: 800; color: #1e3a8a; }
+    .month-book-header p { font-size: 0.82rem; color: #475569; }
+    .sign-row { display: flex; justify-content: space-between; margin-top: 24px; padding: 10px 16px 2px; text-align: center; }
+    .sign-box { font-size: 0.82rem; font-weight: 700; color: #1e293b; min-width: 160px; border-top: 1px dotted #334155; padding-top: 5px; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(3px); z-index: 999999; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: white; border-radius: 12px; max-width: 500px; width: 100%; padding: 22px; box-shadow: 0 20px 25px rgba(0,0,0,0.25); }
+    .modal-header { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+    @media print {
+      body { background: white; color: black; font-size: 9.5pt; }
+      .no-print, .app-header, .nav-container, #loginScreenOverlay, .modal-overlay { display: none !important; }
+      .tab-pane { display: none !important; }
+      .tab-pane.print-active { display: block !important; }
+      .card { border: none; padding: 0; margin: 0; }
+      .card-title { display: none; }
+      table { width: 100% !important; } th, td { border: 1px solid black !important; padding: 4px 6px !important; font-size: 8.5pt !important; }
+      .month-book-card { border: 1.5px solid black !important; margin-bottom: 14px !important; padding: 6px !important; }
+      .page-break-always { page-break-after: always !important; }
+      @page { size: A4 landscape; margin: 10mm 8mm; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== LOGIN SCREEN OVERLAY ==================== -->
+  <div id="loginScreenOverlay">
+    <div class="login-card">
+      <div class="login-badge"><i class="fa-solid fa-lock"></i></div>
+      <h2 class="login-title">શાળા રોજમેળ લૉગિન</h2>
+      <p class="login-subtitle">પ્રાથમિક શાળા રોજમેળ & SMC હિસાબ પ્રણાલી</p>
+
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+        <div class="login-field">
+          <label><i class="fa-solid fa-school"></i> શાળાનો ડાયસ કોડ (U-DISE Code) *</label>
+          <input type="text" id="loginUdise" class="login-input" placeholder="૧૧ આંકડાનો U-DISE કોડ" required autofocus>
+        </div>
+
+        <div class="login-field">
+          <label><i class="fa-solid fa-key"></i> પાસવર્ડ (Password) *</label>
+          <input type="password" id="loginPassword" class="login-input" placeholder="તમારો સિક્રેટ પાસવર્ડ" required>
+        </div>
+
+        <div class="login-field">
+          <label><i class="fa-solid fa-calendar-days"></i> નાણાકીય વર્ષ (Financial Year) *</label>
+          <select id="loginYear" class="login-input" required>
+            <option value="2025-2026">2025-2026</option>
+            <option value="2026-2027">2026-2027</option>
+            <option value="2027-2028">2027-2028</option>
+            <option value="2024-2025">2024-2025</option>
+          </select>
+        </div>
+
+        <!-- 4 DEPARTMENTS / ROJMEL BOOKS -->
+        <div class="login-field">
+          <label><i class="fa-solid fa-layer-group"></i> ખાતા / રોજમેળનો પ્રકાર (Book Type) *</label>
+          <select id="loginBookType" class="login-input" required>
+            <option value="SMC">૧. SMC (એસ.એમ.સી. સામાન્ય રોજમેળ)</option>
+            <option value="SMC_EDU">૨. SMC Education (શિક્ષણ રોજમેળ)</option>
+            <option value="SHALA">૩. શાળા રોજમેળ (શાળા સામાન્ય હિસાબ)</option>
+            <option value="TM3">૪. TM-3 (ટી.એમ.-૩ રોજમેળ)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="login-btn" id="loginSubmitBtn">
+          <span><i class="fa-solid fa-right-to-bracket"></i> લૉગિન કરો અને આગળ વધો</span>
+        </button>
+
+        <div class="login-alert" id="loginAlertBox"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== APP HEADER ==================== -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-icon"><i class="fa-solid fa-book-bookmark"></i></div>
+      <div>
+        <div class="brand-title" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span id="topHeaderSchoolTitle">શાળા રોજમેળ પ્રણાલી</span>
+          <span class="status-badge" id="topHeaderBookBadge" style="background:#f59e0b; color:#0f172a; font-weight:800; font-size:0.82rem; padding:3px 10px;">
+            <i class="fa-solid fa-book-open"></i> SMC રોજમેળ
+          </span>
+        </div>
+        <div class="brand-subtitle">
+          U-DISE: <span id="topHeaderUdise">-</span> | વર્ષ: <span id="topHeaderYear">2025-2026</span> | વિભાગ: <strong id="topHeaderBookNameText">SMC સામાન્ય રોજમેળ</strong>
+        </div>
+      </div>
+    </div>
+    <div class="header-actions no-print">
+      <span class="status-badge"><i class="fa-solid fa-circle-check"></i> <span id="licenseStatusText">ઓથોરાઇઝ્ડ</span></span>
+      <button class="btn btn-sm btn-outline" style="color:white; border-color:rgba(255,255,255,0.4);" onclick="triggerPrintCurrentTab()">
+        <i class="fa-solid fa-print"></i> પત્રક પ્રિન્ટ
+      </button>
+      <button class="btn btn-sm btn-danger" onclick="logoutSession()">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> લૉગઆઉટ
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== 4-BOOK QUICK SWITCHER BAR ==================== -->
+  <div class="no-print" style="background:#0f172a; border-bottom:2px solid #3b82f6; padding:6px 16px;">
+    <div style="max-width:1380px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+      <div style="font-size:0.82rem; color:#94a3b8; font-weight:700; display:flex; align-items:center; gap:6px;">
+        <i class="fa-solid fa-layer-group" style="color:#60a5fa;"></i> રોજમેળ બદલો (Quick Switch):
+      </div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;" id="quickBookSwitchContainer">
+        <button type="button" class="btn btn-sm" id="btnBook_SMC" onclick="switchActiveBook('SMC')" style="background:#1e3a8a; color:white; border:1px solid #3b82f6; font-weight:700;">
+          <i class="fa-solid fa-landmark"></i> ૧. SMC રોજમેળ
+        </button>
+        <button type="button" class="btn btn-sm" id="btnBook_SMC_EDU" onclick="switchActiveBook('SMC_EDU')" style="background:#1e293b; color:#cbd5e1; border:1px solid #475569;">
+          <i class="fa-solid fa-graduation-cap"></i> ૨. SMC Education
+        </button>
+        <button type="button" class="btn btn-sm" id="btnBook_SHALA" onclick="switchActiveBook('SHALA')" style="background:#1e293b; color:#cbd5e1; border:1px solid #475569;">
+          <i class="fa-solid fa-school"></i> ૩. શાળા રોજમેળ
+        </button>
+        <button type="button" class="btn btn-sm" id="btnBook_TM3" onclick="switchActiveBook('TM3')" style="background:#1e293b; color:#cbd5e1; border:1px solid #475569;">
+          <i class="fa-solid fa-file-invoice-dollar"></i> ૪. TM-3 રોજમેળ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 10-TAB NAVIGATION ==================== -->
+  <div class="nav-container no-print">
+    <nav class="main-nav">
+      <button class="nav-btn active" onclick="switchTab('entryTab')"><i class="fa-solid fa-keyboard"></i> ૧. ડેટા એન્ટ્રી</button>
+      <button class="nav-btn" onclick="switchTab('ledgerManageTab')"><i class="fa-solid fa-folder-tree"></i> ૨. લેજર સિલક</button>
+      <button class="nav-btn" onclick="switchTab('cashbookTab')"><i class="fa-solid fa-book-open"></i> ૩. માસિક રોજમેળ</button>
+      <button class="nav-btn" onclick="switchTab('parishisht8Tab')"><i class="fa-solid fa-chart-pie"></i> ૪. પરિશિષ્ટ ૮</button>
+      <button class="nav-btn" onclick="switchTab('parishisht9Tab')"><i class="fa-solid fa-scale-balanced"></i> ૫. પરિશિષ્ટ ૯ (BRS)</button>
+      <button class="nav-btn" onclick="switchTab('parishisht10Tab')"><i class="fa-solid fa-table-cells"></i> ૬. પરિશિષ્ટ ૧૦</button>
+      <button class="nav-btn" onclick="switchTab('billRegisterTab')"><i class="fa-solid fa-file-invoice"></i> ૭. બિલ રજીસ્ટર</button>
+      <button class="nav-btn" onclick="switchTab('chequeRegisterTab')"><i class="fa-solid fa-money-check"></i> ૮. ચેક રજીસ્ટર</button>
+      <button class="nav-btn" onclick="switchTab('ledgerBookTab')"><i class="fa-solid fa-book-journal-whills"></i> ૯. ખાતાવહી</button>
+      <button class="nav-btn" onclick="switchTab('settingsTab')"><i class="fa-solid fa-gear"></i> ૧૦. સેટિંગ્સ & બેકઅપ</button>
+    </nav>
+  </div>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-content">
+
+    <!-- TAB 1: DATA ENTRY -->
+    <section id="entryTab" class="tab-pane active">
+      <div class="metrics-grid no-print">
+        <div class="metric-card"><div class="metric-icon" style="background:#0284c7;"><i class="fa-solid fa-vault"></i></div><div class="metric-info"><h4>ઉઘડતી સિલક</h4><div class="val" id="metricOpeningBal">₹ 0.00</div></div></div>
+        <div class="metric-card"><div class="metric-icon" style="background:#16a34a;"><i class="fa-solid fa-arrow-down"></i></div><div class="metric-info"><h4>કુલ આવક (જમા)</h4><div class="val" id="metricTotalIncome">₹ 0.00</div></div></div>
+        <div class="metric-card"><div class="metric-icon" style="background:#dc2626;"><i class="fa-solid fa-arrow-up"></i></div><div class="metric-info"><h4>કુલ ખર્ચ (ઉધાર)</h4><div class="val" id="metricTotalExpense">₹ 0.00</div></div></div>
+        <div class="metric-card"><div class="metric-icon" style="background:#8b5cf6;"><i class="fa-solid fa-wallet"></i></div><div class="metric-info"><h4>આખર બંધ સિલક</h4><div class="val" id="metricClosingBal">₹ 0.00</div></div></div>
+      </div>
+
+      <div class="card no-print">
+        <div class="card-title"><span><i class="fa-solid fa-pen-nib"></i> નવો વ્યવહાર નોંધો</span></div>
+        <form id="transactionForm" onsubmit="saveTransaction(event)">
+          <input type="hidden" id="editTxId" value="">
+          <div class="form-grid">
+            <div class="form-group"><label>વ્યવહારનો પ્રકાર *</label><select id="txType" class="form-control" onchange="toggleTxFields()"><option value="expense">ખર્ચ (ઉધાર - Debit)</option><option value="income">આવક (જમા - Credit)</option></select></div>
+            <div class="form-group"><label>તારીખ *</label><input type="date" id="txDate" class="form-control" required></div>
+            <div class="form-group"><label>ગ્રાન્ટ / લેજર હેડ *</label><select id="txLedger" class="form-control" onchange="checkNewLedgerOption(this)" required></select></div>
+            <div class="form-group" id="partyGroup"><label id="partyLabel">પાર્ટી / વેપારીનું નામ *</label><input type="text" id="txParty" class="form-control" placeholder="દા.ત. પટેલ સ્ટેશનર્સ" required></div>
+            <div class="form-group"><label>મોડ *</label><select id="txMode" class="form-control"><option value="Bank">બેંક (PFMS / Cheque)</option><option value="Cash">રોકડ (Cash)</option></select></div>
+            <div class="form-group" id="billNoGroup"><label>બિલ નંબર</label><input type="text" id="txBillNo" class="form-control" placeholder="દા.ત. 154"></div>
+            <div class="form-group"><label>ચેક નંબર</label><input type="text" id="txChequeNo" class="form-control" placeholder="દા.ત. 000154"></div>
+            <div class="form-group"><label>રકમ (₹) *</label><input type="number" step="0.01" id="txAmount" class="form-control" placeholder="0.00" required></div>
+          </div>
+          <div class="form-group" style="margin-top:10px;"><label>વિગત / નોંધ (Optional)</label><input type="text" id="txRemarks" class="form-control" placeholder="દા.ત. સ્ટેશનરી ખરીદી પેટે"></div>
+          <div style="margin-top:14px; display:flex; gap:10px;">
+            <button type="submit" class="btn btn-primary" id="saveTxBtn"><i class="fa-solid fa-floppy-disk"></i> સેવ કરો</button>
+            <button type="button" class="btn btn-outline" onclick="resetTxForm()"><i class="fa-solid fa-rotate-left"></i> સાફ કરો</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card no-print">
+        <div class="card-title">
+          <span><i class="fa-solid fa-list-check"></i> નોંધાયેલ વ્યવહારો</span>
+          <input type="text" id="txSearchInput" class="form-control" style="width:220px;" placeholder="શોધો..." oninput="renderTransactionsTable()">
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th width="5%">વાઉચર</th><th width="10%">તારીખ</th><th width="8%">પ્રકાર</th><th width="18%">લેજર</th><th width="22%">પાર્ટી / વિગત</th><th width="8%">મોડ</th><th width="8%">બિલ નં.</th><th width="8%">ચેક નં.</th><th width="10%" class="text-right">રકમ (₹)</th><th width="7%">ક્રિયા</th></tr></thead>
+            <tbody id="txTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: LEDGER MANAGEMENT -->
+    <section id="ledgerManageTab" class="tab-pane">
+      <div class="card">
+        <div class="card-title"><span><i class="fa-solid fa-folder-tree"></i> લેજર મેનેજમેન્ટ & ઉઘડતી સિલક</span><button class="btn btn-sm btn-primary no-print" onclick="openAddLedgerModal()"><i class="fa-solid fa-plus"></i> નવું લેજર</button></div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th width="6%">ક્રમ</th><th width="40%" class="text-left">લેજર / ગ્રાન્ટનું નામ</th><th width="24%" class="text-right">શરૂઆતની ઉઘડતી સિલક (₹)</th><th width="15%">વ્યવહારો</th><th width="15%" class="no-print">ક્રિયા</th></tr></thead>
+            <tbody id="ledgerManageTableBody"></tbody>
+            <tfoot><tr class="row-cyan"><td colspan="2" class="font-bold text-right">કુલ લેજર ઉઘડતી સિલક:</td><td class="font-bold text-right" id="totalLedgerOpeningDisplay">₹ 0.00</td><td colspan="2"></td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: CASHBOOK (SHEET 2) -->
+    <section id="cashbookTab" class="tab-pane">
+      <div class="no-print" style="margin-bottom:14px; background:white; padding:14px; border-radius:10px; border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h2 style="font-size:1.15rem; font-weight:700; color:var(--primary);"><i class="fa-solid fa-book-open"></i> રોજમેળ પત્રક</h2>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <select id="cashbookViewMode" class="form-control" style="width:180px; font-weight:700;" onchange="handleViewModeChange()">
+            <option value="MONTH_WISE">૧. માસ વાઇઝ રોજમેળ</option>
+            <option value="ANNUAL_CONTINUOUS">૨. વાર્ષિક સળંગ રોજમેળ</option>
+          </select>
+          <div id="monthFilterContainer">
+            <select id="cashbookMonthSelect" class="form-control" style="width:140px;" onchange="renderCashbook()">
+              <option value="ALL">-- તમામ ૧૨ માસ --</option>
+              <option value="4">૧. એપ્રિલ</option><option value="5">૨. મે</option><option value="6">૩. જૂન</option>
+              <option value="7">૪. જુલાઈ</option><option value="8">૫. ઓગસ્ટ</option><option value="9">૬. સપ્ટેમ્બર</option>
+              <option value="10">૭. ઓક્ટોબર</option><option value="11">૮. નવેમ્બર</option><option value="12">૯. ડિસેમ્બર</option>
+              <option value="1">૧૦. જાન્યુઆરી</option><option value="2">૧૧. ફેબ્રુઆરી</option><option value="3">૧૨. માર્ચ</option>
+            </select>
+          </div>
+          <button class="btn btn-outline" style="border-color:#2563eb; color:#2563eb;" onclick="printMonthWiseAction()"><i class="fa-solid fa-calendar-days"></i> માસ વાઇઝ પ્રિન્ટ</button>
+          <button class="btn btn-primary" onclick="printAnnualContinuousAction()"><i class="fa-solid fa-file-contract"></i> વાર્ષિક સળંગ પ્રિન્ટ</button>
+        </div>
+      </div>
+      <div id="cashbookContainer"></div>
+    </section>
+
+    <!-- TAB 4: PARISHISHT 8 -->
+    <section id="parishisht8Tab" class="tab-pane">
+      <div class="no-print" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="font-size:1.15rem; font-weight:700; color:var(--primary);"><i class="fa-solid fa-chart-pie"></i> પરિશિષ્ટ: ૮ (વાર્ષિક આવક-ખર્ચ)</h2>
+        <button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button>
+      </div>
+      <div class="card">
+        <div style="text-align:center; margin-bottom:14px;"><h2 id="p8SchoolName">-</h2><h3>પરિશિષ્ટ: ૮</h3><p>વર્ષ <span id="p8Year">-</span> આવક-ખર્ચ પત્રક (<span class="dynBookNameLabel">-</span>)</p></div>
+        <div class="table-container"><table><thead><tr><th width="8%">ક્રમ</th><th width="62%" class="text-left">વિગત</th><th width="30%" class="text-right">રકમ (₹)</th></tr></thead><tbody id="p8TableBody"></tbody></table></div>
+        <div class="sign-row"><div class="sign-box">તૈયાર કરનાર શિક્ષક</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
+      </div>
+    </section>
+
+    <!-- TAB 5: PARISHISHT 9 (BRS) -->
+    <section id="parishisht9Tab" class="tab-pane">
+      <div class="no-print" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="font-size:1.15rem; font-weight:700; color:var(--primary);"><i class="fa-solid fa-scale-balanced"></i> પરિશિષ્ટ: ૯ (બેંક મેળવણું)</h2>
+        <button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button>
+      </div>
+      <div class="card">
+        <div style="text-align:center; margin-bottom:12px;"><h2>પરિશિષ્ટ– ૦૯</h2><p>તા.૩૧-૦૩-<span class="dynEndYear">-</span> ની સ્થિતિએ બેંક સાથે મેળવણું (<span class="dynBookNameLabel">-</span>)</p></div>
+        <div class="table-container" style="margin-bottom:12px;">
+          <table>
+            <tr><td width="20%"><strong>શાળા / સમિતિ:</strong></td><td width="30%" id="p9SchoolName">-</td><td width="20%"><strong>સી.આર.સી.:</strong></td><td width="30%" id="p9Crc">-</td></tr>
+            <tr><td><strong>ખાતા નંબર:</strong></td><td id="p9BankAcc">-</td><td><strong>બેંકનું નામ:</strong></td><td id="p9BankName">-</td></tr>
+            <tr><td><strong>ડાયસ કોડ:</strong></td><td id="p9Udise">-</td><td><strong>તાલુકો:</strong></td><td id="p9Taluka">-</td></tr>
+          </table>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th width="8%">ક્રમ</th><th width="62%" class="text-left">વિગત</th><th width="30%" class="text-right">રકમ (₹)</th></tr></thead>
+            <tbody>
+              <tr><td class="text-center font-bold">૧ (+)</td><td>રોજમેળ પ્રમાણે તા.૩૧-૦૩-<span class="dynEndYear">-</span> ની સિલક</td><td class="text-right font-bold" id="brsRojmelBal">₹ 0.00</td></tr>
+              <tr class="row-yellow"><td colspan="2" class="text-right font-bold">કુલ:</td><td class="text-right font-bold" id="brsSubTotal1">₹ 0.00</td></tr>
+              <tr class="row-green"><td colspan="2" class="font-bold">પાસબુક / બેંક સ્ટેટમેન્ટ પ્રમાણે તા.૩૧-૦૩-<span class="dynEndYear">-</span> સિલક</td><td class="text-right font-bold" id="brsPassbookBal">₹ 0.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="sign-row"><div class="sign-box">હિસાબ તપાસનાર</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
+      </div>
+    </section>
+
+    <!-- TAB 6: PARISHISHT 10 -->
+    <section id="parishisht10Tab" class="tab-pane">
+      <div class="no-print" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="font-size:1.15rem; font-weight:700; color:var(--primary);"><i class="fa-solid fa-table-cells"></i> પરિશિષ્ટ: ૧૦ (ગ્રાન્ટ વાઇઝ ખર્ચ)</h2>
+        <div style="display:flex; gap:10px; align-items:center;"><label><input type="checkbox" id="p10ActiveOnlyToggle" onchange="renderParishisht10()"> સક્રિય લેજર</label><button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button></div>
+      </div>
+      <div class="card">
+        <div style="text-align:center; margin-bottom:12px;"><h2>પરિશિષ્ટ– ૧૦</h2><p>નાણાકીય વર્ષ <span class="dynFullYear">-</span> (<span class="dynBookNameLabel">-</span>)</p></div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th width="5%">ક્રમ</th><th width="23%" class="text-left">ખાતાનું નામ</th><th width="12%" class="text-right">શરૂઆત સિલક</th><th width="12%" class="text-right">મળેલ ગ્રાન્ટ</th><th width="12%" class="text-right">કુલ રકમ</th><th width="12%" class="text-right">ખર્ચ</th><th width="10%" class="text-right">પરત</th><th width="14%" class="text-right">બંધ સિલક</th></tr></thead>
+            <tbody id="p10TableBody"></tbody>
+            <tfoot><tr class="row-yellow font-bold"><td colspan="2" class="text-center">કુલ સરવાળો:</td><td class="text-right" id="p10TotalOpening">₹ 0.00</td><td class="text-right" id="p10TotalIncome">₹ 0.00</td><td class="text-right" id="p10TotalCombined">₹ 0.00</td><td class="text-right" id="p10TotalExpense">₹ 0.00</td><td class="text-right">₹ 0.00</td><td class="text-right" id="p10TotalClosing">₹ 0.00</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="sign-row"><div class="sign-box">તૈયાર કરનાર શિક્ષક</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
+      </div>
+    </section>
+
+    <!-- TAB 7: BILL REGISTER -->
+    <section id="billRegisterTab" class="tab-pane">
+      <div class="no-print" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="font-size:1.15rem; font-weight:700; color:var(--primary);"><i class="fa-solid fa-file-invoice"></i> બિલ રજીસ્ટર</h2>
+        <button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button>
+      </div>
+      <div class="card">
+        <div style="text-align:center; margin-bottom:12px;"><h2 id="billRegSchoolHeader">-</h2><h3>બિલ રજીસ્ટર (<span class="dynBookNameLabel">-</span>)</h3></div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th width="6%">બિલ નં.</th><th width="10%">તારીખ</th><th width="22%" class="text-left">બિલની વિગત</th><th width="22%" class="text-left">કોના તરફથી મળેલ</th><th width="12%" class="text-right">બિલ રકમ</th><th width="10%">ચેક નં.</th><th width="12%" class="text-right">ચુકવેલ રકમ</th><th width="6%">સહી</th></tr></thead>
+            <tbody id="billRegTableBody"></tbody>
+            <tfoot><tr class="row-yellow font-bold"><td colspan="4" class="text-right">કુલ સરવાળો:</td><td class="text-right" id="billRegTotalAmt">₹ 0.00</td><td></td><td class="text-right" id="billRegTotalPaid">₹ 0.00</td><td></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="sign-row"><div class="sign-box">તૈયાર કરનાર</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
+      </div>
+    </section>
+
+    <!-- TAB 8: CHEQUE REGISTER -->
+    <section id="chequeRegisterTab" class="tab-pane">
+      <div class="no-print" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="font-size:1.15rem; font-weight:700; color:var(--primary);"><i class="fa-solid fa-money-check"></i> ચેક ઇસ્યુ રજીસ્ટર</h2>
+        <button class="btn btn-primary" onclick="triggerPrintCurrentTab()"><i class="fa-solid fa-print"></i> પ્રિન્ટ કરો</button>
+      </div>
+      <div class="card">
+        <div style="text-align:center; margin-bottom:12px;"><h2 id="chequeRegSchoolHeader">-</h2><h3>ચેક ઇસ્યુ રજીસ્ટર (<span class="dynBookNameLabel">-</span>)</h3></div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th width="10%">તારીખ</th><th width="10%">ચેક નં.</th><th width="8%">વાઉચર</th><th width="28%" class="text-left">કોના નામે ચેક લખ્યો</th><th width="14%" class="text-right">રકમ (₹)</th><th width="22%" class="text-left">વિગત</th><th width="8%">સહી</th></tr></thead>
+            <tbody id="chequeRegTableBody"></tbody>
+            <tfoot><tr class="row-yellow font-bold"><td colspan="4" class="text-right">કુલ સરવાળો:</td><td class="text-right" id="chequeRegTotalAmt">₹ 0.00</td><td colspan="2"></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="sign-row"><div class="sign-box">તૈયાર કરનાર</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
+      </div>
+    </section>
+
+    <!-- TAB 9: LEDGER BOOK -->
+    <section id="ledgerBookTab" class="tab-pane">
+      <div class="no-print" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <h2 style="font-size:1.15rem; font-weight:700; color:var(--primary);"><i class="fa-solid fa-book-journal-whills"></i> ખાતાવહી પત્રક</h2>
+        <div style="display:flex; gap:8px;">
+          <select id="ledgerBookFilter" class="form-control" style="width:200px;" onchange="renderLedgerBook()"><option value="ALL">-- તમામ લેજર એક સાથે --</option></select>
+          <button class="btn btn-primary" onclick="printAllLedgersCombined()"><i class="fa-solid fa-file-pdf"></i> તમામ ખાતાવહી પ્રિન્ટ</button>
+        </div>
+      </div>
+      <div id="ledgerBookContainer"></div>
+    </section>
+
+    <!-- TAB 10: SETTINGS & BACKUP -->
+    <section id="settingsTab" class="tab-pane">
+      <div class="card">
+        <div class="card-title"><span><i class="fa-solid fa-school-flag"></i> શાળા પ્રોફાઇલ અને સામાન્ય સેટિંગ્સ</span></div>
+        <form id="schoolProfileForm" onsubmit="saveSchoolSettings(event)">
+          <div class="form-grid">
+            <div class="form-group"><label>શાળાનું નામ [લૉક]</label><input type="text" id="settingSchoolName" class="form-control" readonly disabled></div>
+            <div class="form-group"><label>ડાયસ કોડ [લૉક]</label><input type="text" id="settingUdise" class="form-control" readonly disabled></div>
+            <div class="form-group"><label>નાણાકીય વર્ષ [લૉક]</label><input type="text" id="settingYear" class="form-control" readonly disabled></div>
+            <div class="form-group"><label>સક્રિય રોજમેળ વિભાગ</label><input type="text" id="settingBookName" class="form-control" style="font-weight:700; color:#1e3a8a;" readonly disabled></div>
+            <div class="form-group"><label>સી.આર.સી. (CRC)</label><input type="text" id="settingCrc" class="form-control"></div>
+            <div class="form-group"><label>તાલુકો (Taluka)</label><input type="text" id="settingTaluka" class="form-control"></div>
+            <div class="form-group"><label>બેંકનું નામ (સદર રોજમેળનું)</label><input type="text" id="settingBankName" class="form-control"></div>
+            <div class="form-group"><label>બેંક ખાતા નંબર (સદર રોજમેળનો)</label><input type="text" id="settingBankAcc" class="form-control"></div>
+            <div class="form-group"><label>શરૂઆત રોકડ સિલક (૦૧-૦૪)</label><input type="number" step="0.01" id="settingOpeningCash" class="form-control" placeholder="0.00"></div>
+          </div>
+          <div style="margin-top:14px;"><button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> વિગતો સેવ કરો</button></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span><i class="fa-solid fa-key"></i> પાસવર્ડ બદલો (Change Password)</span></div>
+        <p style="font-size:0.86rem; color:#475569; margin-bottom:12px;">નવો પાસવર્ડ સેટ કરતાં તે તરત જ તમારી માસ્ટર ગૂગલ સ્પ્રેડશીટમાં અપડેટ થઈ જશે.</p>
+        <button class="btn btn-primary" onclick="openVoluntaryChangePasswordModal()"><i class="fa-solid fa-lock-open"></i> પાસવર્ડ બદલવા અહીં ક્લિક કરો</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span><i class="fa-solid fa-database"></i> ડેટા બેકઅપ અને સુરક્ષા</span></div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+          <button class="btn btn-outline" onclick="exportDataJson()"><i class="fa-solid fa-download"></i> બેકઅપ ફાઇલ ડાઉનલોડ (JSON)</button>
+          <label class="btn btn-outline" style="cursor:pointer; margin-bottom:0;"><i class="fa-solid fa-upload"></i> બેકઅપ રીસ્ટોર<input type="file" id="importJsonFileInput" accept=".json" style="display:none;" onchange="importDataJson(event)"></label>
+          <button class="btn btn-danger" onclick="confirmResetAllData()"><i class="fa-solid fa-trash-can"></i> તમામ ડેટા સાફ કરો</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: CHANGE PASSWORD -->
+  <div class="modal-overlay" id="changePasswordModal">
+    <div class="modal-box" style="border-top:5px solid var(--primary);">
+      <div class="modal-header">
+        <span id="changePasswordModalTitle"><i class="fa-solid fa-key"></i> નવો પાસવર્ડ સેટ કરો</span>
+        <button id="closePassModalBtn" onclick="closeChangePasswordModal()" style="border:none; background:none; font-size:1.3rem; cursor:pointer; display:none;">&times;</button>
+      </div>
+      <div id="firstLoginAlertNotice" style="background:#eff6ff; border:1px solid #bfdbfe; padding:10px; border-radius:8px; font-size:0.84rem; color:#1e40af; font-weight:600; margin-bottom:12px;">
+        <i class="fa-solid fa-triangle-exclamation"></i> તમે ડિફોલ્ટ પાસવર્ડથી લૉગિન કર્યું છે. કૃપા કરીને સૌપ્રથમ તમારો નવો ગુપ્ત પાસવર્ડ બનાવો.
+      </div>
+      <form id="changePasswordForm" onsubmit="handleChangePasswordSubmit(event)">
+        <div class="form-group" style="margin-bottom:12px;"><label>હાલનો પાસવર્ડ *</label><input type="password" id="currentPassInput" class="form-control" required placeholder="હાલનો પાસવર્ડ"></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>નવો પાસવર્ડ (ઓછામાં ઓછા ૪ અક્ષર) *</label><input type="password" id="newPassInput" class="form-control" required minlength="4" placeholder="નવો પાસવર્ડ"></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>નવા પાસવર્ડની પુષ્ટિ *</label><input type="password" id="confirmNewPassInput" class="form-control" required minlength="4" placeholder="નવો પાસવર્ડ ફરીથી લખો"></div>
+        <div id="changePassAlertBox" class="login-alert" style="margin-bottom:12px;"></div>
+        <div class="modal-footer"><button type="submit" id="saveNewPassBtn" class="btn btn-primary" style="width:100%; justify-content:center;"><i class="fa-solid fa-lock"></i> નવો પાસવર્ડ સેવ કરો</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT LEDGER -->
+  <div class="modal-overlay" id="ledgerModal">
+    <div class="modal-box">
+      <div class="modal-header"><span id="ledgerModalTitle">નવું લેજર</span><button onclick="closeLedgerModal()" style="border:none; background:none; font-size:1.2rem; cursor:pointer;">&times;</button></div>
+      <form id="ledgerModalForm" onsubmit="saveLedgerModal(event)">
+        <input type="hidden" id="modalLedgerOriginalName" value="">
+        <div class="form-group" style="margin-bottom:12px;"><label>લેજરનું નામ *</label><input type="text" id="modalLedgerName" class="form-control" placeholder="દા.ત. કમ્પોઝિટ ગ્રાન્ટ" required></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>શરૂઆતની ઉઘડતી સિલક (₹)</label><input type="number" step="0.01" id="modalLedgerOpening" class="form-control" placeholder="0.00" value="0.00"></div>
+        <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeLedgerModal()">રદ કરો</button><button type="submit" class="btn btn-primary">સેવ કરો</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    // DEPLOYED GOOGLE APPS SCRIPT WEB APP URL
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxSqizCZJuiTMYfDfoXNcX0cjUY80D5ACeehJeDdLiHiGuyECxDBPvRx-YHrtik9juc/exec";
+    const SESSION_KEY = 'ROJMEL_ACTIVE_SESSION';
+
+    // ===== CLOUD SYNC (Google Sheet via Apps Script) =====
+    let cloudPass = '';
+    let cloudTimer = null;
+    function setSyncStatus(msg, color) {
+      let el = document.getElementById('syncStatusBadge');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'syncStatusBadge';
+        el.className = 'no-print';
+        el.style.cssText = 'position:fixed;bottom:10px;right:10px;z-index:99999;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25);';
+        document.body.appendChild(el);
+      }
+      el.style.background = color || '#475569';
+      el.textContent = msg;
+    }
+    function cloudBody(extra) {
+      const s = appData.school;
+      return JSON.stringify(Object.assign({ udise: s.udise, pass: cloudPass, year: s.year, bookType: s.bookType }, extra));
+    }
+    async function cloudPull() {
+      if (!cloudPass) return;
+      try {
+        setSyncStatus('☁ ક્લાઉડમાંથી ડેટા લાવી રહ્યા છીએ...', '#2563eb');
+        const s = appData.school;
+        const url = `${APPS_SCRIPT_URL}?action=loadData&udise=${encodeURIComponent(s.udise)}&pass=${encodeURIComponent(cloudPass)}&year=${encodeURIComponent(s.year)}&bookType=${encodeURIComponent(s.bookType)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && data.success && data.data) {
+          const cloud = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
+          const localTs = appData.updatedAt || 0;
+          if ((cloud.updatedAt || 0) >= localTs) {
+            const currentSchool = Object.assign({}, appData.school);
+            appData = Object.assign({}, appData, cloud);
+            appData.school = Object.assign({}, cloud.school || {}, currentSchool);
+            localStorage.setItem(getActiveStorageKey(), JSON.stringify(appData));
+          }
+          setSyncStatus('☁ ક્લાઉડ સાથે સિંક ✓', '#16a34a');
+        } else if (data && data.success) {
+          cloudPush(); // cloud ma haju data nathi -> local upload
+        } else {
+          setSyncStatus('☁ સિંક નિષ્ફળ', '#dc2626');
+        }
+      } catch (e) { setSyncStatus('☁ ઓફલાઇન (ફોનમાં સેવ)', '#d97706'); }
+    }
+    function cloudPushDebounced() {
+      clearTimeout(cloudTimer);
+      cloudTimer = setTimeout(cloudPush, 1500);
+    }
+    async function cloudPush() {
+      if (!cloudPass || !appData.school.udise) return;
+      try {
+        setSyncStatus('☁ સેવ થઈ રહ્યું છે...', '#2563eb');
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: cloudBody({ action: 'saveData', data: JSON.stringify(appData) })
+        });
+        const out = await res.json();
+        setSyncStatus(out && out.success ? '☁ ક્લાઉડમાં સેવ ✓' : '☁ સેવ નિષ્ફળ', out && out.success ? '#16a34a' : '#dc2626');
+      } catch (e) { setSyncStatus('☁ ઓફલાઇન (ફોનમાં સેવ)', '#d97706'); }
+    }
+
+    const BOOK_CONFIG = {
+      'SMC': { name: 'SMC સામાન્ય રોજમેળ', badge: 'SMC રોજમેળ', defaultLedgers: ['કમ્પોઝિટ ગ્રાન્ટ', 'સ્વચ્છતા ગ્રાન્ટ', 'SCHOOL REPAIRING', 'ઈકો ક્લબ', 'ઈન્ટરનેટ ગ્રાન્ટ', 'વાલી સંમેલન', 'વ્યાજ પરત', 'અન્ય'] },
+      'SMC_EDU': { name: 'SMC Education (શિક્ષણ રોજમેળ)', badge: 'SMC શિક્ષણ', defaultLedgers: ['શૈક્ષણિક સાધન સહાય', 'બાળમેળો / લાઈબ્રેરી', 'પ્રજ્ઞા અભિગમ', 'પ્રવેશોત્સવ', 'ગણવેશ સહાય', 'વિદ્યાલક્ષ્મી બોન્ડ', 'વ્યાજ પરત', 'અન્ય'] },
+      'SHALA': { name: 'શાળા રોજમેળ (સામાન્ય હિસાબ)', badge: 'શાળા રોજમેળ', defaultLedgers: ['શાળા પંચાયત', 'પરીક્ષા ફી / ખર્ચ', 'પ્રવાસ / મુલાકાત', 'શાળા દાન / લોકભાગીદારી', 'વિદ્યાર્થી પ્રવૃત્તિ', 'વ્યાજ પરત', 'અન્ય'] },
+      'TM3': { name: 'TM-3 રોજમેળ (શિક્ષણ સમિતિ)', badge: 'TM-3 રોજમેળ', defaultLedgers: ['TM-3 સામાન્ય ખર્ચ', 'વીજળી બિલ ખર્ચ', 'સ્ટેશનરી / સાધન સામગ્રી', 'આકસ્મિક ખર્ચ', 'વ્યાજ પરત', 'અન્ય'] }
+    };
+
+    let appData = {
+      school: { name: "", udise: "", year: "2025-2026", bookType: "SMC", crc: "", taluka: "", bankName: "", bankAccount: "", openingCash: 0.00 },
+      ledgers: [],
+      transactions: []
+    };
+
+    function getActiveStorageKey(targetBookType) {
+      const sch = appData.school;
+      const bType = targetBookType || (sch && sch.bookType) || 'SMC';
+      if (sch && sch.udise && sch.year) return `ROJMEL_${sch.udise}_${sch.year}_${bType}`;
+      return `SCHOOL_ROJMEL_AUTH_V6_${bType}`;
+    }
+
+    function switchActiveBook(newBookType) {
+      if (!BOOK_CONFIG[newBookType] || appData.school.bookType === newBookType) return;
+      saveAppData();
+      appData.school.bookType = newBookType;
+      try {
+        const session = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
+        session.bookType = newBookType;
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      } catch(e) {}
+      loadAppDataForCurrentSchoolAndYear();
+      refreshAllViews();
+      cloudPull().then(() => refreshAllViews());
+    }
+
+    let isPasswordChangeMandatory = false;
+
+    function openForcedChangePasswordModal(currentEnteredPass) {
+      isPasswordChangeMandatory = true;
+      document.getElementById('changePasswordModalTitle').innerHTML = '<i class="fa-solid fa-shield-halved" style="color:#d97706;"></i> પ્રથમ વખત લૉગિન: નવો પાસવર્ડ સેટ કરો';
+      document.getElementById('firstLoginAlertNotice').style.display = 'block';
+      document.getElementById('closePassModalBtn').style.display = 'none';
+      document.getElementById('currentPassInput').value = currentEnteredPass || '';
+      document.getElementById('newPassInput').value = '';
+      document.getElementById('confirmNewPassInput').value = '';
+      document.getElementById('changePassAlertBox').style.display = 'none';
+      document.getElementById('changePasswordModal').classList.add('show');
+    }
+
+    function openVoluntaryChangePasswordModal() {
+      isPasswordChangeMandatory = false;
+      document.getElementById('changePasswordModalTitle').innerHTML = '<i class="fa-solid fa-key" style="color:var(--primary);"></i> પાસવર્ડ બદલો (Change Password)';
+      document.getElementById('firstLoginAlertNotice').style.display = 'none';
+      document.getElementById('closePassModalBtn').style.display = 'block';
+      document.getElementById('currentPassInput').value = '';
+      document.getElementById('newPassInput').value = '';
+      document.getElementById('confirmNewPassInput').value = '';
+      document.getElementById('changePassAlertBox').style.display = 'none';
+      document.getElementById('changePasswordModal').classList.add('show');
+    }
+
+    function closeChangePasswordModal() {
+      if (isPasswordChangeMandatory) { alert("પ્રથમ લૉગિન પર નવો પાસવર્ડ સેટ કરવો ફરજિયાત છે!"); return; }
+      document.getElementById('changePasswordModal').classList.remove('show');
+    }
+
+    async function handleChangePasswordSubmit(e) {
+      e.preventDefault();
+      const currentPass = document.getElementById('currentPassInput').value.trim();
+      const newPass = document.getElementById('newPassInput').value.trim();
+      const confirmPass = document.getElementById('confirmNewPassInput').value.trim();
+      const alertBox = document.getElementById('changePassAlertBox');
+      const submitBtn = document.getElementById('saveNewPassBtn');
+
+      if (!newPass || !confirmPass) { alertBox.className = 'login-alert danger'; alertBox.innerText = 'નવો પાસવર્ડ દાખલ કરો.'; alertBox.style.display = 'block'; return; }
+      if (newPass.length < 4) { alertBox.className = 'login-alert danger'; alertBox.innerText = 'નવો પાસવર્ડ ઓછામાં ઓછા ૪ અક્ષરનો હોવો જોઈએ.'; alertBox.style.display = 'block'; return; }
+      if (newPass === '12345' || newPass === 'admin') { alertBox.className = 'login-alert danger'; alertBox.innerText = 'ડિફોલ્ટ પાસવર્ડ રાખવાની મંજૂરી નથી!'; alertBox.style.display = 'block'; return; }
+      if (newPass !== confirmPass) { alertBox.className = 'login-alert danger'; alertBox.innerText = 'બંને પાસવર્ડ સરખા હોવા જોઈએ!'; alertBox.style.display = 'block'; return; }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> અપડેટ થઈ રહ્યું છે...';
+
+      try {
+        const queryUrl = `${APPS_SCRIPT_URL}?action=changePassword&udise=${encodeURIComponent(appData.school.udise)}&oldPass=${encodeURIComponent(currentPass)}&newPass=${encodeURIComponent(newPass)}&year=${encodeURIComponent(appData.school.year)}`;
+        const res = await fetch(queryUrl);
+        const data = await res.json();
+        if (data && data.success) {
+          alertBox.className = 'login-alert success';
+          alertBox.innerText = 'નવો પાસવર્ડ સફળતાપૂર્વક અપડેટ થઈ ગયો છે!';
+          alertBox.style.display = 'block';
+          setTimeout(() => {
+            document.getElementById('changePasswordModal').classList.remove('show');
+            alert("તમારો નવો પાસવર્ડ સેવ થઈ ગયો છે! હવેથી આ નવા પાસવર્ડ વડે જ લૉગિન થશે.");
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-lock"></i> નવો પાસવર્ડ સેવ કરો';
+          }, 800);
+        } else {
+          alertBox.className = 'login-alert danger';
+          alertBox.innerText = data.message || 'પાસવર્ડ બદલવામાં ભૂલ આવી!';
+          alertBox.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-solid fa-lock"></i> નવો પાસવર્ડ સેવ કરો';
+        }
+      } catch (err) {
+        alertBox.className = 'login-alert danger';
+        alertBox.innerText = 'સર્વર કનેક્શનમાં ભૂલ આવી!';
+        alertBox.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-lock"></i> નવો પાસવર્ડ સેવ કરો';
+      }
+    }
+
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const udise = document.getElementById('loginUdise').value.trim();
+      const pass = document.getElementById('loginPassword').value.trim();
+      const year = document.getElementById('loginYear').value.trim();
+      const bookType = document.getElementById('loginBookType').value;
+      const submitBtn = document.getElementById('loginSubmitBtn');
+
+      if (!udise || !pass || !year) { showLoginAlert("બધી વિગતો દાખલ કરો.", "danger"); return; }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ચકાસણી થઈ રહી છે...';
+      showLoginAlert("ગૂગલ સ્પ્રેડશીટ સાથે કનેક્ટ થઈ રહ્યું છે...", "info");
+
+      try {
+        const queryUrl = `${APPS_SCRIPT_URL}?udise=${encodeURIComponent(udise)}&pass=${encodeURIComponent(pass)}&year=${encodeURIComponent(year)}`;
+        const res = await fetch(queryUrl);
+        const data = await res.json();
+
+        if (data && data.authorized) {
+          appData.school.name = data.schoolName || appData.school.name;
+          appData.school.udise = udise;
+          appData.school.year = year;
+          appData.school.bookType = bookType;
+
+          if (data.crc) appData.school.crc = data.crc;
+          if (data.taluka) appData.school.taluka = data.taluka;
+          if (data.bankName) appData.school.bankName = data.bankName;
+          if (data.bankAccount) appData.school.bankAccount = data.bankAccount;
+
+          cloudPass = pass;
+          loadAppDataForCurrentSchoolAndYear();
+
+          sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+            udise: udise, year: year, bookType: bookType, pass: pass, loggedInAt: Date.now()
+          }));
+          await cloudPull();
+
+          saveAppData();
+          document.getElementById('loginScreenOverlay').style.display = 'none';
+          refreshAllViews();
+
+          if (data.isDefaultPassword || pass === '12345' || pass === 'admin') {
+            openForcedChangePasswordModal(pass);
+          }
+        } else {
+          showLoginAlert(data.message || "ખોટો ડાયસ કોડ, પાસવર્ડ અથવા વર્ષ માટે પરવાનગી નથી.", "danger");
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span><i class="fa-solid fa-right-to-bracket"></i> લૉગિન કરો અને આગળ વધો</span>';
+        }
+      } catch (err) {
+        showLoginAlert("સર્વર કનેક્શનમાં ભૂલ આવી! ઇન્ટરનેટ કનેક્શન તપાસો.", "danger");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span><i class="fa-solid fa-right-to-bracket"></i> લૉગિન કરો અને આગળ વધો</span>';
+      }
+    }
+
+    function showLoginAlert(msg, type) {
+      const box = document.getElementById('loginAlertBox');
+      box.className = `login-alert ${type}`;
+      box.innerText = msg;
+      box.style.display = 'block';
+    }
+
+    function checkActiveSession() {
+      const session = sessionStorage.getItem(SESSION_KEY);
+      if (session) {
+        try {
+          const sObj = JSON.parse(session);
+          if (sObj.udise && sObj.year) {
+            appData.school.udise = sObj.udise;
+            appData.school.year = sObj.year;
+            appData.school.bookType = sObj.bookType || 'SMC';
+            cloudPass = sObj.pass || '';
+            document.getElementById('loginScreenOverlay').style.display = 'none';
+            return true;
+          }
+        } catch(e) {}
+      }
+      document.getElementById('loginScreenOverlay').style.display = 'flex';
+      return false;
+    }
+
+    function logoutSession() {
+      if (confirm("શું તમે સોફ્ટવેરમાંથી લૉગઆઉટ કરવા માંગો છો?")) {
+        sessionStorage.removeItem(SESSION_KEY);
+        location.reload();
+      }
+    }
+
+    function loadAppDataForCurrentSchoolAndYear() {
+      const storageKey = getActiveStorageKey();
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          const currentSchool = Object.assign({}, appData.school);
+          appData = Object.assign({}, appData, parsed);
+          appData.school = Object.assign({}, appData.school, currentSchool);
+        } catch(e) {}
+      } else {
+        const cfg = BOOK_CONFIG[appData.school.bookType] || BOOK_CONFIG['SMC'];
+        appData.transactions = [];
+        appData.ledgers = cfg.defaultLedgers.map(name => ({ name, opening: 0 }));
+        appData.school.openingCash = 0;
+      }
+    }
+
+    function initApp() {
+      const sessionActive = checkActiveSession();
+      if (sessionActive) { loadAppDataForCurrentSchoolAndYear(); cloudPull().then(() => { refreshAllViews(); }); }
+      refreshAllViews();
+      resetTxForm();
+    }
+
+    function saveAppData() {
+      const storageKey = getActiveStorageKey();
+      appData.updatedAt = Date.now();
+      localStorage.setItem(storageKey, JSON.stringify(appData));
+      cloudPushDebounced();
+      updateMetricsDashboard();
+      updateHeaderBadges();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active', 'print-active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add('active');
+      const btns = Array.from(document.querySelectorAll('.nav-btn'));
+      const found = btns.find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(tabId));
+      if (found) found.classList.add('active');
+
+      if (tabId === 'cashbookTab') renderCashbook();
+      if (tabId === 'parishisht8Tab') renderParishisht8();
+      if (tabId === 'parishisht9Tab') renderParishisht9();
+      if (tabId === 'parishisht10Tab') renderParishisht10();
+      if (tabId === 'billRegisterTab') renderBillRegister();
+      if (tabId === 'chequeRegisterTab') renderChequeRegister();
+      if (tabId === 'ledgerBookTab') renderLedgerBook();
+      if (tabId === 'ledgerManageTab') renderLedgerManageTable();
+      if (tabId === 'settingsTab') populateSettingsForm();
+    }
+
+    function sortAndRecalculateVouchers() {
+      appData.transactions.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return (parseInt(a.billNo) || 0) - (parseInt(b.billNo) || 0);
+      });
+      let vCounter = 1;
+      appData.transactions.forEach(tx => { tx.voucherNo = (tx.type === 'expense') ? vCounter++ : ''; });
+    }
+
+    function toggleTxFields() {
+      const isExp = document.getElementById('txType').value === 'expense';
+      document.getElementById('partyLabel').innerText = isExp ? "પાર્ટી / વેપારીનું નામ *" : "કોના તરફથી મળેલ / વિગત *";
+      document.getElementById('billNoGroup').style.display = isExp ? 'flex' : 'none';
+    }
+
+    function checkNewLedgerOption(select) {
+      if (select.value === '__ADD_NEW__') { openAddLedgerModal(); select.value = ''; }
+    }
+
+    function saveTransaction(e) {
+      e.preventDefault();
+      const editId = document.getElementById('editTxId').value;
+      const type = document.getElementById('txType').value;
+      const date = document.getElementById('txDate').value;
+      const ledger = document.getElementById('txLedger').value;
+      const party = document.getElementById('txParty').value.trim();
+      const mode = document.getElementById('txMode').value;
+      const billNo = document.getElementById('txBillNo').value.trim();
+      const chequeNo = document.getElementById('txChequeNo').value.trim();
+      const amount = parseFloat(document.getElementById('txAmount').value) || 0;
+      const remarks = document.getElementById('txRemarks').value.trim();
+
+      if (!ledger) { alert("લેજર પસંદ કરો."); return; }
+
+      if (editId) {
+        const idx = appData.transactions.findIndex(t => t.id === editId);
+        if (idx !== -1) appData.transactions[idx] = { id: editId, type, date, ledger, party, mode, billNo, chequeNo, amount, remarks };
+      } else {
+        appData.transactions.push({ id: 'tx_' + Date.now(), type, date, ledger, party, mode, billNo, chequeNo, amount, remarks });
+      }
+
+      sortAndRecalculateVouchers();
+      saveAppData();
+      resetTxForm();
+      renderTransactionsTable();
+      populateLedgerDropdowns();
+    }
+
+    function resetTxForm() {
+      document.getElementById('transactionForm').reset();
+      document.getElementById('editTxId').value = '';
+      document.getElementById('saveTxBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> સેવ કરો';
+      document.getElementById('txDate').valueAsDate = new Date();
+      toggleTxFields();
+    }
+
+    function editTransaction(id) {
+      const tx = appData.transactions.find(t => t.id === id);
+      if (!tx) return;
+      document.getElementById('editTxId').value = tx.id;
+      document.getElementById('txType').value = tx.type;
+      document.getElementById('txDate').value = tx.date;
+      document.getElementById('txLedger').value = tx.ledger;
+      document.getElementById('txParty').value = tx.party;
+      document.getElementById('txMode').value = tx.mode;
+      document.getElementById('txBillNo').value = tx.billNo || '';
+      document.getElementById('txChequeNo').value = tx.chequeNo || '';
+      document.getElementById('txAmount').value = tx.amount;
+      document.getElementById('txRemarks').value = tx.remarks || '';
+      document.getElementById('saveTxBtn').innerHTML = '<i class="fa-solid fa-check"></i> સુધારો સેવ કરો';
+      toggleTxFields();
+      window.scrollTo({ top: 100, behavior: 'smooth' });
+    }
+
+    function deleteTransaction(id) {
+      if (!confirm("આ વ્યવહાર રદ કરવો છે?")) return;
+      appData.transactions = appData.transactions.filter(t => t.id !== id);
+      sortAndRecalculateVouchers();
+      saveAppData();
+      renderTransactionsTable();
+    }
+
+    function renderTransactionsTable() {
+      const tbody = document.getElementById('txTableBody');
+      const search = (document.getElementById('txSearchInput').value || '').toLowerCase();
+      tbody.innerHTML = '';
+
+      const filtered = appData.transactions.filter(t => 
+        (t.party && t.party.toLowerCase().includes(search)) ||
+        (t.ledger && t.ledger.toLowerCase().includes(search)) ||
+        (t.date && t.date.includes(search))
+      );
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center" style="padding:18px; color:#64748b;">કોઈ વ્યવહાર મળેલ નથી.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(tx => {
+        const isExp = tx.type === 'expense';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="text-center font-bold">${tx.voucherNo || '-'}</td>
+          <td class="text-center">${formatDateGuj(tx.date)}</td>
+          <td class="text-center"><span class="status-badge" style="background:${isExp ? '#ef4444' : '#22c55e'}; font-size:0.75rem;">${isExp ? 'ખર્ચ' : 'આવક'}</span></td>
+          <td><strong>${tx.ledger}</strong></td>
+          <td>${tx.party} ${tx.remarks ? `<small style="color:#64748b;"><br>${tx.remarks}</small>` : ''}</td>
+          <td class="text-center">${tx.mode === 'Cash' ? 'રોકડ' : 'બેંક'}</td>
+          <td class="text-center">${tx.billNo || '-'}</td>
+          <td class="text-center">${tx.chequeNo || '-'}</td>
+          <td class="text-right font-bold" style="color:${isExp ? '#b91c1c' : '#15803d'}">₹ ${formatCurrency(tx.amount)}</td>
+          <td class="text-center no-print">
+            <button class="btn btn-sm btn-outline" onclick="editTransaction('${tx.id}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="deleteTransaction('${tx.id}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function populateLedgerDropdowns() {
+      const select = document.getElementById('txLedger');
+      const filterSelect = document.getElementById('ledgerBookFilter');
+      const curVal = select.value;
+      select.innerHTML = '<option value="">-- લેજર પસંદ કરો --</option>';
+      filterSelect.innerHTML = '<option value="ALL">-- તમામ લેજર એક સાથે --</option>';
+
+      appData.ledgers.forEach(l => {
+        const opt = document.createElement('option');
+        opt.value = l.name; opt.textContent = l.name; select.appendChild(opt);
+        const fOpt = document.createElement('option');
+        fOpt.value = l.name; fOpt.textContent = l.name; filterSelect.appendChild(fOpt);
+      });
+
+      const addOpt = document.createElement('option');
+      addOpt.value = '__ADD_NEW__'; addOpt.textContent = '+ નવું લેજર ઉમેરો...'; select.appendChild(addOpt);
+      if (curVal) select.value = curVal;
+    }
+
+    function renderLedgerManageTable() {
+      const tbody = document.getElementById('ledgerManageTableBody');
+      tbody.innerHTML = '';
+      let totalOpening = 0;
+      appData.ledgers.forEach((l, idx) => {
+        totalOpening += (parseFloat(l.opening) || 0);
+        const txCount = appData.transactions.filter(t => t.ledger === l.name).length;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="text-center">${idx + 1}</td>
+          <td><strong>${l.name}</strong></td>
+          <td class="text-right font-bold">₹ ${formatCurrency(l.opening || 0)}</td>
+          <td class="text-center"><span class="status-badge">${txCount} એન્ટ્રી</span></td>
+          <td class="text-center no-print">
+            <button class="btn btn-sm btn-outline" onclick="openEditLedgerModal('${l.name}')"><i class="fa-solid fa-pen"></i> સુધારો</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteLedger('${l.name}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('totalLedgerOpeningDisplay').innerText = `₹ ${formatCurrency(totalOpening)}`;
+    }
+
+    function openAddLedgerModal() {
+      document.getElementById('ledgerModalTitle').innerText = "નવું લેજર";
+      document.getElementById('modalLedgerOriginalName').value = "";
+      document.getElementById('modalLedgerName').value = "";
+      document.getElementById('modalLedgerOpening').value = "0.00";
+      document.getElementById('ledgerModal').classList.add('show');
+    }
+
+    function openEditLedgerModal(name) {
+      const ledger = appData.ledgers.find(l => l.name === name);
+      if (!ledger) return;
+      document.getElementById('ledgerModalTitle').innerText = "લેજર સુધારો";
+      document.getElementById('modalLedgerOriginalName').value = ledger.name;
+      document.getElementById('modalLedgerName').value = ledger.name;
+      document.getElementById('modalLedgerOpening').value = ledger.opening || 0;
+      document.getElementById('ledgerModal').classList.add('show');
+    }
+
+    function closeLedgerModal() { document.getElementById('ledgerModal').classList.remove('show'); }
+
+    function saveLedgerModal(e) {
+      e.preventDefault();
+      const orig = document.getElementById('modalLedgerOriginalName').value.trim();
+      const name = document.getElementById('modalLedgerName').value.trim();
+      const op = parseFloat(document.getElementById('modalLedgerOpening').value) || 0;
+      if (!name) return;
+
+      if (orig) {
+        const idx = appData.ledgers.findIndex(l => l.name === orig);
+        if (idx !== -1) {
+          appData.ledgers[idx].name = name; appData.ledgers[idx].opening = op;
+          appData.transactions.forEach(t => { if (t.ledger === orig) t.ledger = name; });
+        }
+      } else {
+        if (!appData.ledgers.some(l => l.name.toLowerCase() === name.toLowerCase())) {
+          appData.ledgers.push({ name, opening: op });
+        }
+      }
+      saveAppData();
+      closeLedgerModal();
+      populateLedgerDropdowns();
+      renderLedgerManageTable();
+      renderTransactionsTable();
+      document.getElementById('txLedger').value = name;
+    }
+
+    function deleteLedger(name) {
+      if (appData.transactions.some(t => t.ledger === name)) { alert("આ લેજરમાં વ્યવહારો નોંધાયેલા છે."); return; }
+      if (!confirm(`'${name}' લેજર રદ કરવું છે?`)) return;
+      appData.ledgers = appData.ledgers.filter(l => l.name !== name);
+      saveAppData();
+      populateLedgerDropdowns();
+      renderLedgerManageTable();
+    }
+
+    const MONTH_ORDER = [
+      { num: 4, name: 'APRIL', gu: 'એપ્રિલ' }, { num: 5, name: 'MAY', gu: 'મે' }, { num: 6, name: 'JUNE', gu: 'જૂન' },
+      { num: 7, name: 'JULY', gu: 'જુલાઈ' }, { num: 8, name: 'AUGUST', gu: 'ઓગસ્ટ' }, { num: 9, name: 'SEPTEMBER', gu: 'સપ્ટેમ્બર' },
+      { num: 10, name: 'OCTOBER', gu: 'ઓક્ટોબર' }, { num: 11, name: 'NOVEMBER', gu: 'નવેમ્બર' }, { num: 12, name: 'DECEMBER', gu: 'ડિસેમ્બર' },
+      { num: 1, name: 'JANUARY', gu: 'જાન્યુઆરી' }, { num: 2, name: 'FEBRUARY', gu: 'ફેબ્રુઆરી' }, { num: 3, name: 'MARCH', gu: 'માર્ચ' }
+    ];
+
+    function handleViewModeChange() {
+      document.getElementById('monthFilterContainer').style.display = (document.getElementById('cashbookViewMode').value === 'ANNUAL_CONTINUOUS') ? 'none' : 'block';
+      renderCashbook();
+    }
+
+    function renderCashbook() {
+      const container = document.getElementById('cashbookContainer');
+      const mode = document.getElementById('cashbookViewMode').value;
+      container.innerHTML = '';
+      if (mode === 'ANNUAL_CONTINUOUS') renderAnnualContinuousCashbook(container);
+      else renderMonthWiseCashbook(container);
+    }
+
+    function renderMonthWiseCashbook(container) {
+      const filterMonth = document.getElementById('cashbookMonthSelect').value;
+      let runCash = parseFloat(appData.school.openingCash) || 0;
+      let runBank = appData.ledgers.reduce((acc, l) => acc + (parseFloat(l.opening) || 0), 0) - runCash;
+      if (runBank < 0) runBank = 0;
+      const startYr = parseInt((appData.school.year || '2025-2026').split('-')[0]) || 2025;
+      const bookCfg = BOOK_CONFIG[appData.school.bookType] || BOOK_CONFIG['SMC'];
+
+      MONTH_ORDER.forEach(m => {
+        const calYear = (m.num >= 4) ? startYr : (startYr + 1);
+        const monthTxs = appData.transactions.filter(t => {
+          if (!t.date) return false;
+          const d = new Date(t.date);
+          return (d.getMonth() + 1) === m.num && d.getFullYear() === calYear;
+        });
+
+        const incomes = monthTxs.filter(t => t.type === 'income');
+        const expenses = monthTxs.filter(t => t.type === 'expense');
+        const opCash = runCash, opBank = runBank, opTot = opCash + opBank;
+
+        let incCash = 0, incBank = 0, expCash = 0, expBank = 0;
+        incomes.forEach(i => { if (i.mode === 'Cash') incCash += i.amount; else incBank += i.amount; });
+        expenses.forEach(e => { if (e.mode === 'Cash') expCash += e.amount; else expBank += e.amount; });
+
+        const clCash = opCash + incCash - expCash;
+        const clBank = opBank + incBank - expBank;
+        runCash = clCash; runBank = clBank;
+
+        if (filterMonth !== 'ALL' && String(m.num) !== String(filterMonth)) return;
+
+        const card = document.createElement('div');
+        card.className = "month-book-card";
+        let rows = `<tr class="row-cyan"><td colspan="3" class="text-center font-bold">શ્રી ઉઘડતી સિલક</td><td class="text-right font-bold">${formatCurrency(opCash)}</td><td class="text-right font-bold">${formatCurrency(opBank)}</td><td class="text-right font-bold">${formatCurrency(opTot)}</td><td colspan="6" class="text-center" style="background:#f8fafc;">-</td></tr>`;
+
+        const maxL = Math.max(incomes.length, expenses.length);
+        if (maxL === 0) {
+          rows += `<tr><td colspan="6" class="text-center" style="padding:10px; color:#64748b;">આ માસમાં કોઈ આવક વ્યવહાર નથી.</td><td colspan="6" class="text-center" style="padding:10px; color:#64748b;">આ માસમાં કોઈ ખર્ચ વ્યવહાર નથી.</td></tr>`;
+        } else {
+          for (let r = 0; r < maxL; r++) {
+            const inc = incomes[r], exp = expenses[r];
+            rows += `<tr>`;
+            if (inc) rows += `<td class="text-center">${formatDateGuj(inc.date)}</td><td>${inc.ledger}</td><td>${inc.party}</td><td class="text-right">${inc.mode === 'Cash' ? formatCurrency(inc.amount) : '0.00'}</td><td class="text-right">${inc.mode === 'Bank' ? formatCurrency(inc.amount) : '0.00'}</td><td class="text-right font-bold">${formatCurrency(inc.amount)}</td>`;
+            else rows += `<td colspan="6" style="background:#fafafa;"></td>`;
+            if (exp) rows += `<td class="text-center">${formatDateGuj(exp.date)}</td><td><strong>${exp.party}</strong> (${exp.ledger})</td><td class="text-center">${exp.chequeNo || '-'}</td><td class="text-center font-bold">${exp.voucherNo || '-'}</td><td class="text-right">${exp.mode === 'Cash' ? formatCurrency(exp.amount) : '0.00'}</td><td class="text-right">${exp.mode === 'Bank' ? formatCurrency(exp.amount) : '0.00'}</td>`;
+            else rows += `<td colspan="6" style="background:#fafafa;"></td>`;
+            rows += `</tr>`;
+          }
+        }
+
+        rows += `
+          <tr class="row-yellow"><td colspan="3" class="text-right font-bold">માસનો સરવાળો:</td><td class="text-right font-bold">${formatCurrency(incCash)}</td><td class="text-right font-bold">${formatCurrency(incBank)}</td><td class="text-right font-bold">${formatCurrency(incCash+incBank)}</td><td colspan="4" class="text-right font-bold">માસનો કુલ ખર્ચ:</td><td class="text-right font-bold">${formatCurrency(expCash)}</td><td class="text-right font-bold">${formatCurrency(expBank)}</td></tr>
+          <tr class="row-green"><td colspan="6"></td><td colspan="4" class="text-right font-bold">બંધ સિલક:</td><td class="text-right font-bold">${formatCurrency(clCash)}</td><td class="text-right font-bold">${formatCurrency(clBank)}</td></tr>
+          <tr class="row-pink"><td colspan="3" class="text-right font-bold">કુલ (સિલક સાથે):</td><td class="text-right font-bold">${formatCurrency(opCash+incCash)}</td><td class="text-right font-bold">${formatCurrency(opBank+incBank)}</td><td class="text-right font-bold">${formatCurrency(opTot+incCash+incBank)}</td><td colspan="4" class="text-right font-bold">કુલ (ખર્ચ + સિલક):</td><td class="text-right font-bold">${formatCurrency(expCash+clCash)}</td><td class="text-right font-bold">${formatCurrency(expBank+clBank)}</td></tr>
+        `;
+
+        card.innerHTML = `
+          <div class="month-book-header"><h3>${appData.school.name} - ${bookCfg.name}</h3><p><strong>માસ: ${m.gu} (${m.name}) - ${calYear}</strong> | વર્ષ: ${appData.school.year} | U-DISE: ${appData.school.udise}</p></div>
+          <div class="table-container"><table><thead><tr><th colspan="6" style="background:#e2e8f0;">આવક બાજુ (જમા - Receipts)</th><th colspan="6" style="background:#fee2e2;">ખર્ચ બાજુ (ઉધાર - Payments)</th></tr><tr><th width="8%">તારીખ</th><th width="12%">વર્ગીકરણ</th><th width="14%">વિગત</th><th width="6%">રોકડ ₹</th><th width="7%">બેંક ₹</th><th width="7%">કુલ ₹</th><th width="8%">તારીખ</th><th width="16%">વિગત</th><th width="6%">ચેક નં.</th><th width="5%">વાઉચર</th><th width="6%">રોકડ ₹</th><th width="7%">બેંક ₹</th></tr></thead><tbody>${rows}</tbody></table></div>
+          <div class="sign-row"><div class="sign-box">તૈયાર કરનાર શિક્ષક</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderAnnualContinuousCashbook(container) {
+      let initCash = parseFloat(appData.school.openingCash) || 0;
+      let initBank = appData.ledgers.reduce((acc, l) => acc + (parseFloat(l.opening) || 0), 0) - initCash;
+      if (initBank < 0) initBank = 0;
+      const bookCfg = BOOK_CONFIG[appData.school.bookType] || BOOK_CONFIG['SMC'];
+
+      const incomes = appData.transactions.filter(t => t.type === 'income');
+      const expenses = appData.transactions.filter(t => t.type === 'expense');
+
+      let totIncCash = 0, totIncBank = 0, totExpCash = 0, totExpBank = 0;
+      incomes.forEach(i => { if (i.mode === 'Cash') totIncCash += i.amount; else totIncBank += i.amount; });
+      expenses.forEach(e => { if (e.mode === 'Cash') totExpCash += e.amount; else totExpBank += e.amount; });
+
+      const clCash = initCash + totIncCash - totExpCash;
+      const clBank = initBank + totIncBank - totExpBank;
+
+      const card = document.createElement('div');
+      card.className = "month-book-card";
+
+      let rows = `<tr class="row-cyan"><td colspan="3" class="text-center font-bold">શ્રી શરૂઆતની ઉઘડતી સિલક (૦૧-૦૪)</td><td class="text-right font-bold">${formatCurrency(initCash)}</td><td class="text-right font-bold">${formatCurrency(initBank)}</td><td class="text-right font-bold">${formatCurrency(initCash+initBank)}</td><td colspan="6" class="text-center" style="background:#f8fafc;">-</td></tr>`;
+
+      const maxL = Math.max(incomes.length, expenses.length);
+      for (let r = 0; r < maxL; r++) {
+        const inc = incomes[r], exp = expenses[r];
+        rows += `<tr>`;
+        if (inc) rows += `<td class="text-center">${formatDateGuj(inc.date)}</td><td>${inc.ledger}</td><td>${inc.party}</td><td class="text-right">${inc.mode === 'Cash' ? formatCurrency(inc.amount) : '0.00'}</td><td class="text-right">${inc.mode === 'Bank' ? formatCurrency(inc.amount) : '0.00'}</td><td class="text-right font-bold">${formatCurrency(inc.amount)}</td>`;
+        else rows += `<td colspan="6" style="background:#fafafa;"></td>`;
+        if (exp) rows += `<td class="text-center">${formatDateGuj(exp.date)}</td><td><strong>${exp.party}</strong> (${exp.ledger})</td><td class="text-center">${exp.chequeNo || '-'}</td><td class="text-center font-bold">${exp.voucherNo || '-'}</td><td class="text-right">${exp.mode === 'Cash' ? formatCurrency(exp.amount) : '0.00'}</td><td class="text-right">${exp.mode === 'Bank' ? formatCurrency(exp.amount) : '0.00'}</td>`;
+        else rows += `<td colspan="6" style="background:#fafafa;"></td>`;
+        rows += `</tr>`;
+      }
+
+      rows += `
+        <tr class="row-yellow"><td colspan="3" class="text-right font-bold">વાર્ષિક કુલ આવક:</td><td class="text-right font-bold">${formatCurrency(totIncCash)}</td><td class="text-right font-bold">${formatCurrency(totIncBank)}</td><td class="text-right font-bold">${formatCurrency(totIncCash+totIncBank)}</td><td colspan="4" class="text-right font-bold">વાર્ષિક કુલ ખર્ચ:</td><td class="text-right font-bold">${formatCurrency(totExpCash)}</td><td class="text-right font-bold">${formatCurrency(totExpBank)}</td></tr>
+        <tr class="row-green"><td colspan="6"></td><td colspan="4" class="text-right font-bold">આખર બંધ સિલક (૩૧-૦૩):</td><td class="text-right font-bold">${formatCurrency(clCash)}</td><td class="text-right font-bold">${formatCurrency(clBank)}</td></tr>
+        <tr class="row-pink"><td colspan="3" class="text-right font-bold">કુલ (સિલક સાથે):</td><td class="text-right font-bold">${formatCurrency(initCash+totIncCash)}</td><td class="text-right font-bold">${formatCurrency(initBank+totIncBank)}</td><td class="text-right font-bold">${formatCurrency(initCash+initBank+totIncCash+totIncBank)}</td><td colspan="4" class="text-right font-bold">કુલ (ખર્ચ + સિલક):</td><td class="text-right font-bold">${formatCurrency(totExpCash+clCash)}</td><td class="text-right font-bold">${formatCurrency(totExpBank+clBank)}</td></tr>
+      `;
+
+      card.innerHTML = `
+        <div class="month-book-header"><h3>${appData.school.name} - વાર્ષિક સળંગ ${bookCfg.name} (April to March)</h3><p>વર્ષ: ${appData.school.year} | U-DISE: ${appData.school.udise}</p></div>
+        <div class="table-container"><table><thead><tr><th colspan="6" style="background:#e2e8f0;">આવક બાજુ (જમા - Receipts)</th><th colspan="6" style="background:#fee2e2;">ખર્ચ બાજુ (ઉધાર - Payments)</th></tr><tr><th width="8%">તારીખ</th><th width="12%">વર્ગીકરણ</th><th width="14%">વિગત</th><th width="6%">રોકડ ₹</th><th width="7%">બેંક ₹</th><th width="7%">કુલ ₹</th><th width="8%">તારીખ</th><th width="16%">વિગત</th><th width="6%">ચેક નં.</th><th width="5%">વાઉચર</th><th width="6%">રોકડ ₹</th><th width="7%">બેંક ₹</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="sign-row"><div class="sign-box">તૈયાર કરનાર શિક્ષક</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
+      `;
+      container.appendChild(card);
+    }
+
+    function printMonthWiseAction() { document.getElementById('cashbookViewMode').value = 'MONTH_WISE'; handleViewModeChange(); triggerPrintCurrentTab(); }
+    function printAnnualContinuousAction() { document.getElementById('cashbookViewMode').value = 'ANNUAL_CONTINUOUS'; handleViewModeChange(); triggerPrintCurrentTab(); }
+
+    function renderParishisht8() {
+      document.getElementById('p8SchoolName').innerText = appData.school.name;
+      document.getElementById('p8Year').innerText = appData.school.year;
+      const tbody = document.getElementById('p8TableBody'); tbody.innerHTML = '';
+      let totOp = appData.ledgers.reduce((acc, l) => acc + (parseFloat(l.opening) || 0), 0);
+      let totInc = 0, totExp = 0;
+      const lMap = {};
+      appData.ledgers.forEach(l => { lMap[l.name] = { op: parseFloat(l.opening) || 0, inc: 0, exp: 0 }; });
+      appData.transactions.forEach(t => {
+        if (!lMap[t.ledger]) lMap[t.ledger] = { op: 0, inc: 0, exp: 0 };
+        if (t.type === 'income') { lMap[t.ledger].inc += t.amount; totInc += t.amount; }
+        else { lMap[t.ledger].exp += t.amount; totExp += t.amount; }
+      });
+      let html = `<tr class="row-cyan"><td class="text-center font-bold">૧</td><td class="font-bold">શરૂઆતની ઉઘડતી સિલક (૦૧-૦૪)</td><td class="text-right font-bold">${formatCurrency(totOp)}</td></tr><tr><td class="text-center font-bold">૨</td><td colspan="2"><strong>વર્ષ દરમિયાન મળેલ આવક:</strong></td></tr>`;
+      let sr = 1;
+      for (const [name, val] of Object.entries(lMap)) { if (val.inc > 0) html += `<tr><td></td><td style="padding-left:20px;">૨.${sr++} ${name}</td><td class="text-right">${formatCurrency(val.inc)}</td></tr>`; }
+      html += `<tr class="row-yellow"><td colspan="2" class="text-right font-bold">કુલ આવક:</td><td class="text-right font-bold">${formatCurrency(totInc)}</td></tr><tr class="row-pink"><td colspan="2" class="text-right font-bold">ઉઘડતી સિલક સાથે કુલ:</td><td class="text-right font-bold">${formatCurrency(totOp+totInc)}</td></tr><tr><td class="text-center font-bold">૩</td><td colspan="2"><strong>વર્ષ દરમિયાન થયેલ ખર્ચ:</strong></td></tr>`;
+      let expSr = 1;
+      for (const [name, val] of Object.entries(lMap)) { if (val.exp > 0) html += `<tr><td></td><td style="padding-left:20px;">૩.${expSr++} ${name}</td><td class="text-right">${formatCurrency(val.exp)}</td></tr>`; }
+      html += `<tr class="row-yellow"><td colspan="2" class="text-right font-bold">કુલ ખર્ચ:</td><td class="text-right font-bold">${formatCurrency(totExp)}</td></tr><tr class="row-green"><td class="text-center font-bold">૪</td><td class="font-bold">આખર બંધ સિલક (૩૧-૦૩):</td><td class="text-right font-bold">${formatCurrency(totOp+totInc-totExp)}</td></tr>`;
+      tbody.innerHTML = html;
+    }
+
+    function renderParishisht9() {
+      const sch = appData.school;
+      document.getElementById('p9SchoolName').innerText = sch.name;
+      document.getElementById('p9Crc').innerText = sch.crc;
+      document.getElementById('p9BankAcc').innerText = sch.bankAccount;
+      document.getElementById('p9BankName').innerText = sch.bankName;
+      document.getElementById('p9Udise').innerText = sch.udise;
+      document.getElementById('p9Taluka').innerText = sch.taluka;
+      const endYr = (sch.year || '2025-2026').split('-')[1] || '2026';
+      document.querySelectorAll('.dynEndYear').forEach(el => el.innerText = endYr);
+      let totOp = appData.ledgers.reduce((acc, l) => acc + (parseFloat(l.opening) || 0), 0);
+      let totInc = appData.transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+      let totExp = appData.transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+      let cl = totOp + totInc - totExp;
+      document.getElementById('brsRojmelBal').innerText = `₹ ${formatCurrency(cl)}`;
+      document.getElementById('brsSubTotal1').innerText = `₹ ${formatCurrency(cl)}`;
+      document.getElementById('brsPassbookBal').innerText = `₹ ${formatCurrency(cl)}`;
+    }
+
+    function renderParishisht10() {
+      const activeOnly = document.getElementById('p10ActiveOnlyToggle').checked;
+      const tbody = document.getElementById('p10TableBody'); tbody.innerHTML = '';
+      let sumOp = 0, sumInc = 0, sumComb = 0, sumExp = 0, sumCl = 0;
+      appData.ledgers.forEach((l, idx) => {
+        const op = parseFloat(l.opening) || 0;
+        const inc = appData.transactions.filter(t => t.ledger === l.name && t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+        const comb = op + inc;
+        const exp = appData.transactions.filter(t => t.ledger === l.name && t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+        const cl = comb - exp;
+        if (activeOnly && op === 0 && inc === 0 && exp === 0) return;
+        sumOp += op; sumInc += inc; sumComb += comb; sumExp += exp; sumCl += cl;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="text-center">${idx + 1}</td><td><strong>${l.name}</strong></td><td class="text-right">${formatCurrency(op)}</td><td class="text-right">${formatCurrency(inc)}</td><td class="text-right font-bold">${formatCurrency(comb)}</td><td class="text-right" style="color:#b91c1c;">${formatCurrency(exp)}</td><td class="text-right">0.00</td><td class="text-right font-bold" style="color:${cl < 0 ? '#b91c1c' : '#15803d'};">${formatCurrency(cl)}</td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('p10TotalOpening').innerText = `₹ ${formatCurrency(sumOp)}`;
+      document.getElementById('p10TotalIncome').innerText = `₹ ${formatCurrency(sumInc)}`;
+      document.getElementById('p10TotalCombined').innerText = `₹ ${formatCurrency(sumComb)}`;
+      document.getElementById('p10TotalExpense').innerText = `₹ ${formatCurrency(sumExp)}`;
+      document.getElementById('p10TotalClosing').innerText = `₹ ${formatCurrency(sumCl)}`;
+    }
+
+    function renderBillRegister() {
+      document.getElementById('billRegSchoolHeader').innerText = appData.school.name;
+      const tbody = document.getElementById('billRegTableBody'); tbody.innerHTML = '';
+      const expenses = appData.transactions.filter(t => t.type === 'expense');
+      let tot = 0;
+      expenses.forEach((tx, idx) => {
+        tot += tx.amount;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="text-center font-bold">${tx.billNo || (idx + 1)}</td><td class="text-center">${formatDateGuj(tx.date)}</td><td>${tx.ledger}</td><td><strong>${tx.party}</strong></td><td class="text-right font-bold">₹ ${formatCurrency(tx.amount)}</td><td class="text-center">${tx.chequeNo || '-'}</td><td class="text-right font-bold">₹ ${formatCurrency(tx.amount)}</td><td class="text-center">-</td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('billRegTotalAmt').innerText = `₹ ${formatCurrency(tot)}`;
+      document.getElementById('billRegTotalPaid').innerText = `₹ ${formatCurrency(tot)}`;
+    }
+
+    function renderChequeRegister() {
+      document.getElementById('chequeRegSchoolHeader').innerText = appData.school.name;
+      const tbody = document.getElementById('chequeRegTableBody'); tbody.innerHTML = '';
+      const bankExp = appData.transactions.filter(t => t.type === 'expense' && (t.mode === 'Bank' || t.chequeNo));
+      let tot = 0;
+      bankExp.forEach(tx => {
+        tot += tx.amount;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="text-center">${formatDateGuj(tx.date)}</td><td class="text-center font-bold">${tx.chequeNo || '-'}</td><td class="text-center font-bold">${tx.voucherNo || '-'}</td><td><strong>${tx.party}</strong></td><td class="text-right font-bold">₹ ${formatCurrency(tx.amount)}</td><td>${tx.ledger}</td><td class="text-center">-</td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('chequeRegTotalAmt').innerText = `₹ ${formatCurrency(tot)}`;
+    }
+
+    function renderLedgerBook() {
+      const container = document.getElementById('ledgerBookContainer');
+      const selected = document.getElementById('ledgerBookFilter').value;
+      container.innerHTML = '';
+      const targets = (selected === 'ALL') ? appData.ledgers : appData.ledgers.filter(l => l.name === selected);
+
+      targets.forEach(l => {
+        const txs = appData.transactions.filter(t => t.ledger === l.name);
+        const op = parseFloat(l.opening) || 0;
+        let run = op, totInc = 0, totExp = 0;
+        let rows = `<tr class="row-cyan"><td class="text-center font-bold">૦૧-૦૪</td><td colspan="2" class="font-bold">ઉઘડતી સિલક</td><td class="text-center">-</td><td class="text-center">-</td><td class="text-right font-bold">${formatCurrency(op)}</td><td class="text-right">-</td><td class="text-right font-bold">${formatCurrency(run)}</td></tr>`;
+        txs.forEach(t => {
+          const isInc = t.type === 'income';
+          if (isInc) { totInc += t.amount; run += t.amount; }
+          else { totExp += t.amount; run -= t.amount; }
+          rows += `<tr><td class="text-center">${formatDateGuj(t.date)}</td><td><strong>${t.party}</strong></td><td>${t.remarks || t.ledger}</td><td class="text-center font-bold">${t.voucherNo || '-'}</td><td class="text-center">${t.chequeNo || t.billNo || '-'}</td><td class="text-right font-bold" style="color:#15803d;">${isInc ? formatCurrency(t.amount) : '0.00'}</td><td class="text-right font-bold" style="color:#b91c1c;">${!isInc ? formatCurrency(t.amount) : '0.00'}</td><td class="text-right font-bold">${formatCurrency(run)}</td></tr>`;
+        });
+        rows += `<tr class="row-yellow font-bold"><td colspan="5" class="text-right">કુલ સરવાળો:</td><td class="text-right font-bold">${formatCurrency(totInc)}</td><td class="text-right font-bold">${formatCurrency(totExp)}</td><td class="text-right font-bold">${formatCurrency(run)}</td></tr><tr class="row-green font-bold"><td colspan="7" class="text-right">બંધ સિલક (૩૧-૦૩):</td><td class="text-right font-bold">${formatCurrency(run)}</td></tr>`;
+
+        const card = document.createElement('div');
+        card.className = "card page-break-always";
+        card.innerHTML = `
+          <div style="text-align:center; margin-bottom:10px;"><h2>${appData.school.name}</h2><h3>ખાતાવહી: ${l.name}</h3><p>વર્ષ: ${appData.school.year}</p></div>
+          <div class="table-container"><table><thead><tr><th width="10%">તારીખ</th><th width="20%" class="text-left">પાર્ટી</th><th width="18%" class="text-left">વિગત</th><th width="7%">વાઉચર</th><th width="9%">ચેક/બિલ</th><th width="12%" class="text-right">જમા ₹</th><th width="12%" class="text-right">ઉધાર ₹</th><th width="12%" class="text-right">સિલક ₹</th></tr></thead><tbody>${rows}</tbody></table></div>
+          <div class="sign-row"><div class="sign-box">તૈયાર કરનાર શિક્ષક</div><div class="sign-box">અધ્યક્ષશ્રી - SMC</div><div class="sign-box">આચાર્યશ્રી / મુ.શિ.</div></div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function printAllLedgersCombined() { document.getElementById('ledgerBookFilter').value = 'ALL'; renderLedgerBook(); switchTab('ledgerBookTab'); window.print(); }
+
+    function populateSettingsForm() {
+      const sch = appData.school;
+      const cfg = BOOK_CONFIG[sch.bookType] || BOOK_CONFIG['SMC'];
+      document.getElementById('settingSchoolName').value = sch.name || '';
+      document.getElementById('settingUdise').value = sch.udise || '';
+      document.getElementById('settingYear').value = sch.year || '2025-2026';
+      document.getElementById('settingBookName').value = cfg.name;
+      document.getElementById('settingCrc').value = sch.crc || '';
+      document.getElementById('settingTaluka').value = sch.taluka || '';
+      document.getElementById('settingBankName').value = sch.bankName || '';
+      document.getElementById('settingBankAcc').value = sch.bankAccount || '';
+      document.getElementById('settingOpeningCash').value = sch.openingCash || 0;
+    }
+
+    function saveSchoolSettings(e) {
+      e.preventDefault();
+      appData.school.crc = document.getElementById('settingCrc').value.trim();
+      appData.school.taluka = document.getElementById('settingTaluka').value.trim();
+      appData.school.bankName = document.getElementById('settingBankName').value.trim();
+      appData.school.bankAccount = document.getElementById('settingBankAcc').value.trim();
+      appData.school.openingCash = parseFloat(document.getElementById('settingOpeningCash').value) || 0;
+      saveAppData();
+      refreshAllViews();
+      alert("વિગતો સેવ થઈ ગઈ છે.");
+    }
+
+    function exportDataJson() {
+      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `Rojmel_${appData.school.udise}_${appData.school.year}_${appData.school.bookType}.json`;
+      a.click();
+    }
+
+    function importDataJson(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (imported && imported.school && Array.isArray(imported.transactions)) {
+            appData = imported; saveAppData(); refreshAllViews(); alert("ડેટા રીસ્ટોર થઈ ગયો છે.");
+          }
+        } catch(err) { alert("ભૂલ: " + err.message); }
+      };
+      reader.readAsText(file);
+    }
+
+    function confirmResetAllData() {
+      if (!confirm("તમામ વ્યવહાર સાફ કરવા છે?")) return;
+      appData.transactions = [];
+      sortAndRecalculateVouchers();
+      saveAppData();
+      refreshAllViews();
+    }
+
+    function updateMetricsDashboard() {
+      let totOp = appData.ledgers.reduce((acc, l) => acc + (parseFloat(l.opening) || 0), 0);
+      let totInc = 0, totExp = 0;
+      appData.transactions.forEach(t => { if (t.type === 'income') totInc += t.amount; else totExp += t.amount; });
+      document.getElementById('metricOpeningBal').innerText = `₹ ${formatCurrency(totOp)}`;
+      document.getElementById('metricTotalIncome').innerText = `₹ ${formatCurrency(totInc)}`;
+      document.getElementById('metricTotalExpense').innerText = `₹ ${formatCurrency(totExp)}`;
+      document.getElementById('metricClosingBal').innerText = `₹ ${formatCurrency(totOp + totInc - totExp)}`;
+    }
+
+    function updateHeaderBadges() {
+      const sch = appData.school;
+      const cfg = BOOK_CONFIG[sch.bookType] || BOOK_CONFIG['SMC'];
+      document.getElementById('topHeaderSchoolTitle').innerText = sch.name || "શાળા રોજમેળ પ્રણાલી";
+      document.getElementById('topHeaderUdise').innerText = sch.udise || "-";
+      document.getElementById('topHeaderYear').innerText = sch.year || "2025-2026";
+      document.getElementById('topHeaderBookBadge').innerHTML = `<i class="fa-solid fa-book-open"></i> ${cfg.badge}`;
+      document.getElementById('topHeaderBookNameText').innerText = cfg.name;
+      document.querySelectorAll('.dynBookNameLabel').forEach(el => el.innerText = cfg.name);
+
+      ['SMC', 'SMC_EDU', 'SHALA', 'TM3'].forEach(k => {
+        const btn = document.getElementById(`btnBook_${k}`);
+        if (btn) {
+          if (k === sch.bookType) {
+            btn.style.background = '#2563eb'; btn.style.color = '#ffffff'; btn.style.borderColor = '#60a5fa';
+          } else {
+            btn.style.background = '#1e293b'; btn.style.color = '#cbd5e1'; btn.style.borderColor = '#475569';
+          }
+        }
+      });
+    }
+
+    function refreshAllViews() {
+      updateHeaderBadges();
+      updateMetricsDashboard();
+      populateLedgerDropdowns();
+      renderTransactionsTable();
+      renderLedgerManageTable();
+      populateSettingsForm();
+    }
+
+    function triggerPrintCurrentTab() {
+      const activeTab = document.querySelector('.tab-pane.active');
+      if (activeTab) { activeTab.classList.add('print-active'); window.print(); activeTab.classList.remove('print-active'); }
+    }
+
+    function formatCurrency(val) {
+      return (parseFloat(val) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatDateGuj(dateStr) {
+      if (!dateStr) return '-';
+      const parts = dateStr.split('-');
+      return (parts.length === 3) ? `${parts[2]}/${parts[1]}/${parts[0]}` : dateStr;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => { initApp(); });
+  </script>
+</body>
+</html>
