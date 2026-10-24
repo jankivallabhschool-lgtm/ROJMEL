@@ -173,6 +173,7 @@
       table { width: 100% !important; } th, td { border: 1px solid black !important; padding: 4px 6px !important; font-size: 8.5pt !important; }
       .month-book-card { border: 1.5px solid black !important; margin-bottom: 14px !important; padding: 6px !important; }
       .page-break-always { page-break-after: always !important; }
+      #ledgerBookContainer .page-break-always:last-child { page-break-after: auto !important; }
       @page { size: A4 landscape; margin: 10mm 8mm; }
     }
   </style>
@@ -1507,7 +1508,7 @@
       });
     }
 
-    function printAllLedgersCombined() { document.getElementById('ledgerBookFilter').value = 'ALL'; renderLedgerBook(); switchTab('ledgerBookTab'); window.print(); }
+    function printAllLedgersCombined() { document.getElementById('ledgerBookFilter').value = 'ALL'; renderLedgerBook(); switchTab('ledgerBookTab'); triggerPrintCurrentTab(); }
 
     function populateSettingsForm() {
       const sch = appData.school;
